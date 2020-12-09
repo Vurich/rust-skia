@@ -272,7 +272,7 @@ impl FinalBuildConfiguration {
 
             if let Some(opt_level) = &build.opt_level {
                 if opt_level.parse::<usize>() != Ok(0) {
-                    cflags.push("-flto");
+                    cflags.push("-flto=thin");
                 }
 
                 opt_level_arg = format!("-O{}", opt_level);
