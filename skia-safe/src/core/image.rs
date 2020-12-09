@@ -7,14 +7,8 @@ use crate::{
 };
 use crate::{FilterQuality, ImageFilter, ImageGenerator, Pixmap};
 use skia_bindings as sb;
-use skia_bindings::{SkFilterOptions, SkImage, SkRefCntBase};
+use skia_bindings::{SkImage, SkRefCntBase};
 use std::{mem, ptr};
-
-pub use skia_bindings::SkSamplingMode as SamplingMode;
-#[test]
-fn test_sampling_mode_naming() {
-    let _ = SamplingMode::Linear;
-}
 
 pub use skia_bindings::SkMipmapMode as MipmapMode;
 #[test]
@@ -24,19 +18,6 @@ fn test_mipmap_mode_naming() {
 
 // TODO: Add MipmapBuilder as soon it's documented or
 //       SkMipmap made its way into the public interface.
-
-#[repr(C)]
-#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
-pub struct FilterOptions {
-    pub sampling: SamplingMode,
-    pub mipmap: MipmapMode,
-}
-
-impl NativeTransmutable<SkFilterOptions> for FilterOptions {}
-#[test]
-fn test_filter_options_layout() {
-    FilterOptions::test_layout()
-}
 
 pub use skia_bindings::SkImage_BitDepth as BitDepth;
 #[test]
@@ -430,28 +411,6 @@ impl RCHandle<SkImage> {
         self.alpha_type().is_opaque()
     }
 
-    pub fn to_shader_with_filter_options<'a>(
-        &self,
-        tile_modes: impl Into<Option<(TileMode, TileMode)>>,
-        filter_options: FilterOptions,
-        local_matrix: impl Into<Option<&'a Matrix>>,
-    ) -> Shader {
-        let tile_modes = tile_modes.into();
-        let tm1 = tile_modes.map(|m| m.0).unwrap_or_default();
-        let tm2 = tile_modes.map(|m| m.1).unwrap_or_default();
-
-        Shader::from_ptr(unsafe {
-            sb::C_SkImage_makeShaderWithFilterOptions(
-                self.native(),
-                tm1,
-                tm2,
-                filter_options.into_native(),
-                local_matrix.into().native_ptr_or_null(),
-            )
-        })
-        .unwrap()
-    }
-
     pub fn to_shader_with_cubic_resampler<'a>(
         &self,
         tile_modes: impl Into<Option<(TileMode, TileMode)>>,
@@ -686,7 +645,7 @@ impl RCHandle<SkImage> {
         unsafe {
             self.native().scalePixels(
                 dst.native(),
-                filter_quality,
+                &sb::C_SkSamplingOptions_fromFilterQuality(filter_quality),
                 caching_hint.into().unwrap_or(CachingHint::Allow),
             )
         }

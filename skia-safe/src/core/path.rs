@@ -538,11 +538,6 @@ impl Handle<SkPath> {
         self
     }
 
-    pub fn shrink_to_fit(&mut self) -> &mut Self {
-        unsafe { self.native_mut().shrinkToFit() }
-        self
-    }
-
     pub fn move_to(&mut self, p: impl Into<Point>) -> &mut Self {
         let p = p.into();
         unsafe {
@@ -761,7 +756,7 @@ impl Handle<SkPath> {
         let start = dir_start.map(|ds| ds.1).unwrap_or_default();
         unsafe {
             self.native_mut()
-                .addRect1(rect.as_ref().native(), dir, start.try_into().unwrap())
+                .addRect(rect.as_ref().native(), dir, start.try_into().unwrap())
         };
         self
     }
@@ -962,21 +957,13 @@ impl Handle<SkPath> {
         unsafe { self.native().contains(p.x, p.y) }
     }
 
-    pub fn dump_as_data(&self, force_close: bool, dump_as_hex: bool) -> Data {
+    pub fn dump_as_data(&self, dump_as_hex: bool) -> Data {
         let mut stream = DynamicMemoryWStream::new();
         unsafe {
             self.native()
-                .dump(stream.native_mut().base_mut(), force_close, dump_as_hex);
+                .dump(stream.native_mut().base_mut(), dump_as_hex);
         }
         stream.detach_as_data()
-    }
-
-    pub fn dump(&self) {
-        unsafe { self.native().dump1() }
-    }
-
-    pub fn dump_hex(&self) {
-        unsafe { self.native().dumpHex() }
     }
 
     // TODO: writeToMemory()?

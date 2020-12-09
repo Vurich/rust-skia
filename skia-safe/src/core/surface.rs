@@ -477,9 +477,9 @@ impl RCHandle<SkSurface> {
         SurfaceProps::from_native_ref(unsafe { &*sb::C_SkSurface_props(self.native()) })
     }
 
-    pub fn flush_and_submit(&mut self) {
+    pub fn flush_and_submit(&mut self, sync_cpu: bool) {
         unsafe {
-            self.native_mut().flushAndSubmit();
+            self.native_mut().flushAndSubmit(sync_cpu);
         }
     }
 

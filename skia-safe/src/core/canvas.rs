@@ -490,7 +490,7 @@ impl Canvas {
         self
     }
 
-    pub fn set_matrix(&mut self, matrix: &Matrix) -> &mut Self {
+    pub fn set_matrix(&mut self, matrix: &M44) -> &mut Self {
         unsafe { self.native_mut().setMatrix(matrix.native()) }
         self
     }

@@ -295,21 +295,27 @@ extern "C" SkImage* C_SkImage_MakeFromPicture(
     return SkImage::MakeFromPicture(sp(picture), *dimensions, matrix, paint, bitDepth, sp(colorSpace)).release();
 }
 
+extern "C" SkSamplingOptions C_SkSamplingOptions_fromFilterQuality(SkFilterQuality filterQuality) {
+    SkSamplingOptions samplingOptions(filterQuality);
+
+    return samplingOptions;
+}
+
 extern "C" SkShader* C_SkImage_makeShader(const SkImage* self, SkTileMode tileMode1, SkTileMode tileMode2, const SkMatrix* localMatrix) {
     return self->makeShader(tileMode1, tileMode2, localMatrix).release();
 }
 
-extern "C" SkShader* C_SkImage_makeShaderWithFilterOptions(const SkImage* self, SkTileMode tileMode1, SkTileMode tileMode2, SkFilterOptions filterOptions, const SkMatrix* localMatrix) {
-    return self->makeShader(tileMode1, tileMode2, filterOptions, localMatrix).release();
-}
+extern "C" SkShader* C_SkImage_makeShaderWithCubicResampler(const SkImage* self, SkTileMode tileMode1, SkTileMode tileMode2, SkCubicResampler cubicResampler, const SkMatrix* localMatrix) {
+    SkSamplingOptions samplingOptions(cubicResampler);
 
-extern "C" SkShader* C_SkImage_makeShaderWithCubicResampler(const SkImage* self, SkTileMode tileMode1, SkTileMode tileMode2, SkImage::CubicResampler cubicResampler, const SkMatrix* localMatrix) {
-    return self->makeShader(tileMode1, tileMode2, cubicResampler, localMatrix).release();
+    return self->makeShader(tileMode1, tileMode2, samplingOptions, localMatrix).release();
 }
 
 extern "C" SkShader *C_SkImage_makeShaderWithQuality(const SkImage *self, SkTileMode tileMode1, SkTileMode tileMode2, const SkMatrix *localMatrix, SkFilterQuality filterQuality)
 {
-    return self->makeShader(tileMode1, tileMode2, localMatrix, filterQuality).release();
+    SkSamplingOptions samplingOptions(filterQuality);
+
+    return self->makeShader(tileMode1, tileMode2, samplingOptions, localMatrix).release();
 }
 
 extern "C" SkData* C_SkImage_encodeToData(const SkImage* self, SkEncodedImageFormat imageFormat, int quality) {
