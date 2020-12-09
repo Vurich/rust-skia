@@ -7,7 +7,7 @@ use super::vk;
 use super::ContextOptions;
 use crate::prelude::*;
 use skia_bindings as sb;
-use skia_bindings::{GrContext, GrDirectContext, SkRefCntBase};
+use skia_bindings::{GrDirectContext, SkRefCntBase};
 use std::ops::{Deref, DerefMut};
 
 pub type DirectContext = RCHandle<GrDirectContext>;
@@ -17,7 +17,7 @@ impl NativeRefCountedBase for GrDirectContext {
 }
 
 impl Deref for RCHandle<GrDirectContext> {
-    type Target = RCHandle<GrContext>;
+    type Target = GrDirectContext;
 
     fn deref(&self) -> &Self::Target {
         unsafe { transmute_ref(self) }

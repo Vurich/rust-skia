@@ -295,14 +295,14 @@ extern "C" SkImage* C_SkImage_MakeFromPicture(
     return SkImage::MakeFromPicture(sp(picture), *dimensions, matrix, paint, bitDepth, sp(colorSpace)).release();
 }
 
-extern "C" SkSamplingOptions C_SkSamplingOptions_fromFilterQuality(SkFilterQuality filterQuality) {
-    SkSamplingOptions samplingOptions(filterQuality);
-
-    return samplingOptions;
-}
-
 extern "C" SkShader* C_SkImage_makeShader(const SkImage* self, SkTileMode tileMode1, SkTileMode tileMode2, const SkMatrix* localMatrix) {
     return self->makeShader(tileMode1, tileMode2, localMatrix).release();
+}
+
+extern "C" bool C_SkImage_scalePixels(const SkImage* self, const SkPixmap& dst, SkFilterQuality filterQuality, SkImage::CachingHint cachingHint) {
+    SkSamplingOptions samplingOptions(filterQuality);
+
+    return self->scalePixels(dst, samplingOptions, cachingHint);
 }
 
 extern "C" SkShader* C_SkImage_makeShaderWithCubicResampler(const SkImage* self, SkTileMode tileMode1, SkTileMode tileMode2, SkCubicResampler cubicResampler, const SkMatrix* localMatrix) {
@@ -1854,6 +1854,12 @@ extern "C" SkPathEffect* C_SkPathEffect_Deserialize(const void* data, size_t len
 
 extern "C" void C_SkPixmap_destruct(SkPixmap* self) {
     self->~SkPixmap();
+}
+
+extern "C" bool C_SkPixmap_scalePixels(const SkPixmap* self, const SkPixmap& dst, SkFilterQuality filterQuality) {
+    SkSamplingOptions samplingOptions(filterQuality);
+
+    return self->scalePixels(dst, samplingOptions);
 }
 
 extern "C" void C_SkPixmap_setColorSpace(SkPixmap* self, SkColorSpace* colorSpace) {

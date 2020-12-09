@@ -229,57 +229,6 @@ impl RCHandle<SkImage> {
         })
     }
 
-    // TODO: rename to clone_from_yuva_textures() ?
-    #[cfg(feature = "gpu")]
-    pub fn from_yuva_textures_copy(
-        context: &mut gpu::RecordingContext,
-        yuv_color_space: crate::YUVColorSpace,
-        yuva_textures: &[gpu::BackendTexture],
-        yuva_indices: &[crate::YUVAIndex; 4],
-        image_size: impl Into<ISize>,
-        image_origin: gpu::SurfaceOrigin,
-        image_color_space: impl Into<Option<ColorSpace>>,
-    ) -> Option<Image> {
-        Image::from_ptr(unsafe {
-            sb::C_SkImage_MakeFromYUVATexturesCopy(
-                context.native_mut(),
-                yuv_color_space,
-                yuva_textures.native().as_ptr(),
-                yuva_indices.native().as_ptr(),
-                image_size.into().into_native(),
-                image_origin,
-                image_color_space.into().into_ptr_or_null(),
-            )
-        })
-    }
-
-    #[allow(clippy::too_many_arguments)]
-    #[cfg(feature = "gpu")]
-    pub fn from_yuva_textures_copy_with_external_backend(
-        context: &mut gpu::RecordingContext,
-        yuv_color_space: crate::YUVColorSpace,
-        yuva_textures: &[gpu::BackendTexture],
-        yuva_indices: &[crate::YUVAIndex; 4],
-        image_size: impl Into<ISize>,
-        image_origin: gpu::SurfaceOrigin,
-        backend_texture: &gpu::BackendTexture,
-        image_color_space: impl Into<Option<ColorSpace>>,
-        // TODO: m78 introduced textureReleaseProc and releaseContext here.
-    ) -> Option<Image> {
-        Image::from_ptr(unsafe {
-            sb::C_SkImage_MakeFromYUVATexturesCopyWithExternalBackend(
-                context.native_mut(),
-                yuv_color_space,
-                yuva_textures.native().as_ptr(),
-                yuva_indices.native().as_ptr(),
-                image_size.into().into_native(),
-                image_origin,
-                backend_texture.native(),
-                image_color_space.into().into_ptr_or_null(),
-            )
-        })
-    }
-
     #[cfg(feature = "gpu")]
     pub fn from_yuva_textures(
         context: &mut gpu::Context,
@@ -305,47 +254,6 @@ impl RCHandle<SkImage> {
     }
 
     // TODO: MakeFromYUVAPixmaps()
-
-    #[cfg(feature = "gpu")]
-    pub fn from_nv12_textures_copy(
-        context: &mut gpu::Context,
-        yuv_color_space: crate::YUVColorSpace,
-        nv12_textures: &[gpu::BackendTexture; 2],
-        image_origin: gpu::SurfaceOrigin,
-        image_color_space: impl Into<Option<ColorSpace>>,
-    ) -> Option<Image> {
-        Image::from_ptr(unsafe {
-            sb::C_SkImage_MakeFromNV12TexturesCopy(
-                context.native_mut(),
-                yuv_color_space,
-                nv12_textures.native().as_ptr(),
-                image_origin,
-                image_color_space.into().into_ptr_or_null(),
-            )
-        })
-    }
-
-    #[cfg(feature = "gpu")]
-    pub fn from_nv12_textures_copy_with_external_backend(
-        context: &mut gpu::Context,
-        yuv_color_space: crate::YUVColorSpace,
-        nv12_textures: &[gpu::BackendTexture; 2],
-        image_origin: gpu::SurfaceOrigin,
-        backend_texture: &gpu::BackendTexture,
-        image_color_space: impl Into<Option<ColorSpace>>,
-        // TODO: m78 introduced textureReleaseProc and releaseContext here.
-    ) -> Option<Image> {
-        Image::from_ptr(unsafe {
-            sb::C_SkImage_MakeFromNV12TexturesCopyWithExternalBackend(
-                context.native_mut(),
-                yuv_color_space,
-                nv12_textures.native().as_ptr(),
-                image_origin,
-                backend_texture.native(),
-                image_color_space.into().into_ptr_or_null(),
-            )
-        })
-    }
 
     pub fn from_picture(
         picture: impl Into<Picture>,
@@ -643,9 +551,10 @@ impl RCHandle<SkImage> {
         caching_hint: impl Into<Option<CachingHint>>,
     ) -> bool {
         unsafe {
-            self.native().scalePixels(
+            sb::C_SkImage_scalePixels(
+                self.native(),
                 dst.native(),
-                &sb::C_SkSamplingOptions_fromFilterQuality(filter_quality),
+                filter_quality,
                 caching_hint.into().unwrap_or(CachingHint::Allow),
             )
         }
