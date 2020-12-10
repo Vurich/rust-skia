@@ -25,6 +25,7 @@ pub(crate) unsafe fn transmute_ref_mut<FromT, ToT>(from: &mut FromT) -> &mut ToT
 
 pub(crate) trait IntoOption {
     type Target;
+
     fn into_option(self) -> Option<Self::Target>;
 }
 

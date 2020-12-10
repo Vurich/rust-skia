@@ -688,9 +688,6 @@ fn generate_bindings(build: &FinalBuildConfiguration, output_directory: &Path) {
         })
         .size_t_is_usize(true)
         .parse_callbacks(Box::new(ParseCallbacks))
-        .raw_line("#![allow(clippy::all)]")
-        // GrVkBackendContext contains u128 fields on macOS
-        .raw_line("#![allow(improper_ctypes)]")
         .whitelist_function("C_.*")
         .constified_enum(".*Mask")
         .constified_enum(".*Flags")
@@ -878,7 +875,8 @@ fn generate_bindings(build: &FinalBuildConfiguration, output_directory: &Path) {
     println!("GENERATING BINDINGS");
     let bindings = builder.generate().expect("Unable to generate bindings");
 
-    let out_path = PathBuf::from("src");
+    let out_path =
+        PathBuf::from(cargo::env_var("OUT_DIR").expect("No build script output directory defined"));
     bindings
         .write_to_file(out_path.join("bindings.rs"))
         .expect("Couldn't write bindings!");
