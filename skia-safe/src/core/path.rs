@@ -175,7 +175,11 @@ impl Iterator for RawIter<'_> {
     }
 }
 
+/// A Skia shape. This is just the abstract shape, which could be either a fill or a stroke
+/// depending on the defined paint (see the documentation for `Paint`). This type is
+/// copy-on-write, and so cloning it will share underlying storage until it is mutated.
 pub type Path = Handle<SkPath>;
+
 unsafe impl Send for Path {}
 unsafe impl Sync for Path {}
 
@@ -204,6 +208,7 @@ impl Default for Handle<SkPath> {
 }
 
 impl Handle<SkPath> {
+    /// Create a path from a set of points and the associated verbs.
     pub fn new_from(
         points: &[Point],
         verbs: &[u8],

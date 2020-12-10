@@ -21,7 +21,7 @@ pub fn should_export() -> Option<PathBuf> {
 /// `source_files` are additional files from below skia-bindings/ that are copied to the target directory.
 pub fn export(
     config: &skia::BinariesConfiguration,
-    source_files: &[(&str, &str)],
+    source_files: &[(&Path, &str)],
     target_dir: &Path,
 ) -> io::Result<()> {
     let half_hash = git::half_hash().expect("failed to retrieve the git hash");

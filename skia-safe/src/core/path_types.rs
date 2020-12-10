@@ -24,6 +24,7 @@ bitflags! {
 }
 
 pub use skia_bindings::SkPathVerb as PathVerb;
+
 #[test]
 fn test_path_verb_naming() {
     let _ = PathVerb::Conic;

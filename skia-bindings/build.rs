@@ -52,10 +52,12 @@ mod env {
     }
 }
 
-const SRC_BINDINGS_RS: &str = "src/bindings.rs";
 const SKIA_LICENSE: &str = "skia/LICENSE";
 
 fn main() {
+    let out_dir = cargo::env_var("OUT_DIR").expect("No build script output directory defined");
+    let src_bindings_rs = Path::new(&out_dir).join("bindings.rs");
+
     // since 0.25.0
     if cfg!(feature = "svg") {
         cargo::warning("The feature 'svg' has been removed. SVG and XML support is available in all build configurations.");
@@ -104,7 +106,9 @@ fn main() {
                     key,
                 );
                 println!("  FROM: {}", url);
-                if let Err(e) = download_and_install(url, &binaries_config.output_directory) {
+                if let Err(e) =
+                    download_and_install(url, &binaries_config.output_directory, &src_bindings_rs)
+                {
                     println!("DOWNLOAD AND INSTALL FAILED: {}", e);
                     if force_download {
                         panic!("Downloading of binaries was forced but failed.")
@@ -147,8 +151,8 @@ fn main() {
 
         println!("EXPORTING BINARIES");
         let source_files = &[
-            (SRC_BINDINGS_RS, "bindings.rs"),
-            (SKIA_LICENSE, "LICENSE_SKIA"),
+            (Path::new(SKIA_LICENSE), "LICENSE_SKIA"),
+            (&src_bindings_rs, "bindings.rs"),
         ];
         binaries::export(&binaries_config, source_files, &staging_directory)
             .expect("EXPORTING BINARIES FAILED")
@@ -178,7 +182,11 @@ fn should_try_download_binaries(
     None
 }
 
-fn download_and_install(url: impl AsRef<str>, output_directory: &Path) -> io::Result<()> {
+fn download_and_install(
+    url: impl AsRef<str>,
+    output_directory: &Path,
+    bindings: &Path,
+) -> io::Result<()> {
     let archive = utils::download(url)?;
     println!(
         "UNPACKING ARCHIVE INTO: {}",
@@ -187,7 +195,7 @@ fn download_and_install(url: impl AsRef<str>, output_directory: &Path) -> io::Re
     binaries::unpack(Cursor::new(archive), output_directory)?;
     // TODO: verify key?
     println!("INSTALLING BINDINGS");
-    fs::copy(output_directory.join("bindings.rs"), SRC_BINDINGS_RS)?;
+    fs::copy(output_directory.join("bindings.rs"), bindings)?;
 
     Ok(())
 }
