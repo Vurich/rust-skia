@@ -21,7 +21,7 @@ impl NativeFlattenable for SkDrawable {
     }
 }
 
-impl RCHandle<SkDrawable> {
+impl Drawable {
     pub fn draw(&mut self, canvas: &mut Canvas, matrix: Option<&Matrix>) {
         unsafe {
             self.native_mut()

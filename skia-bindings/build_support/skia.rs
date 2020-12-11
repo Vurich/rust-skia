@@ -39,7 +39,7 @@ impl Default for BuildConfiguration {
             features: Features {
                 gl: cfg!(feature = "gl"),
                 skvm_jit: cfg!(feature = "skvm-jit"),
-                xml: cfg!(feature = "xml"),
+                lottie: cfg!(feature = "lottie"),
                 pdf: cfg!(feature = "pdf"),
                 egl: cfg!(feature = "egl"),
                 wayland: cfg!(feature = "wayland"),
@@ -55,8 +55,8 @@ impl Default for BuildConfiguration {
                 particles: false,
             },
             definitions: Vec::new(),
-            cc: cargo::env_var("CC").unwrap_or("clang".to_string()),
-            cxx: cargo::env_var("CXX").unwrap_or("clang++".to_string()),
+            cc: cargo::env_var("CC").unwrap_or_else(|| "clang".to_string()),
+            cxx: cargo::env_var("CXX").unwrap_or_else(|| "clang++".to_string()),
         }
     }
 }
@@ -95,8 +95,8 @@ pub struct Features {
     /// Build with (experimental) JIT support for SKVM?
     pub skvm_jit: bool,
 
-    /// Build with XML support? This is supplied by expat, and always enabled for Android targets.
-    pub xml: bool,
+    /// Build with Lottie animation support?
+    pub lottie: bool,
 
     /// Build with PDF backend?
     pub pdf: bool,
@@ -212,6 +212,7 @@ impl FinalBuildConfiguration {
                 // since it's a template-based UI-building library.
                 ("skia_enable_skrive", no()),
                 ("skia_enable_gpu", yes_if(features.gpu())),
+                ("skia_enable_skottie", yes_if(features.lottie)),
                 (
                     "skia_enable_skvm_jit_when_possible",
                     yes_if(features.skvm_jit),
@@ -225,6 +226,8 @@ impl FinalBuildConfiguration {
                 ("skia_use_libwebp_decode", yes_if(features.webp_decode)),
                 ("skia_use_system_zlib", no()),
                 ("skia_use_xps", no()),
+                ("skia_use_expat", yes()),
+                ("skia_use_system_expat", no()),
                 ("skia_use_dng_sdk", yes_if(features.dng)),
                 ("cc", quote(&build.cc)),
                 ("cxx", quote(&build.cxx)),
@@ -273,8 +276,6 @@ impl FinalBuildConfiguration {
             if features.webp_encode || features.webp_decode {
                 args.push(("skia_use_system_libwebp", no()))
             }
-
-            let mut use_expat = features.xml;
 
             // target specific gn args.
             let target = cargo::target();
@@ -334,22 +335,11 @@ impl FinalBuildConfiguration {
                     args.push(("target_cpu", quote(clang::target_arch(arch))));
                     args.push(("skia_use_system_freetype2", no()));
                     args.push(("skia_enable_fontmgr_android", yes()));
-                    // Enabling fontmgr_android implicitly enables expat.
-                    // We make this explicit to avoid relying on an expat installed
-                    // in the system.
-                    use_expat = true;
                 }
                 (arch, _, os, _) => {
                     args.push(("target_cpu", quote(clang::target_arch(arch))));
                     args.push(("target_os", quote(os)));
                 }
-            }
-
-            if use_expat {
-                args.push(("skia_use_expat", yes()));
-                args.push(("skia_use_system_expat", no()));
-            } else {
-                args.push(("skia_use_expat", no()));
             }
 
             if !cflags.is_empty() {
@@ -414,11 +404,17 @@ impl FinalBuildConfiguration {
             sources
         };
 
+        let mut definitions = build.definitions.clone();
+
+        if features.lottie {
+            definitions.push(("SK_ENABLE_SKOTTIE".to_string(), None));
+        }
+
         FinalBuildConfiguration {
             skia_source_dir: skia_source_dir.into(),
             gn_args,
             ninja_files,
-            definitions: build.definitions.clone(),
+            definitions,
             binding_sources,
         }
     }
@@ -708,7 +704,7 @@ pub fn build_skia(
 
 fn generate_bindings(build: &FinalBuildConfiguration, output_directory: &Path) {
     let builder = bindgen::Builder::default()
-        .generate_comments(false)
+        .generate_comments(true)
         .layout_tests(true)
         .default_enum_style(EnumVariation::Rust {
             non_exhaustive: false,

@@ -64,7 +64,7 @@ impl Default for RCHandle<SkShader> {
     }
 }
 
-impl RCHandle<SkShader> {
+impl Shader {
     pub fn is_opaque(&self) -> bool {
         unsafe { sb::C_SkShader_isOpaque(self.native()) }
     }

@@ -35,7 +35,7 @@ impl Default for Font {
     }
 }
 
-impl Handle<SkFont> {
+impl Font {
     pub fn new(typeface: impl Into<Typeface>, size: impl Into<Option<scalar>>) -> Self {
         Self::from_typeface(typeface, size)
     }

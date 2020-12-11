@@ -5,6 +5,8 @@ pub mod codec;
 pub use codec::Result as CodecResult;
 pub use codec::{Codec, EncodedOrigin};
 
+#[cfg(feature = "lottie")]
+pub mod animation;
 mod core;
 mod docs;
 mod effects;

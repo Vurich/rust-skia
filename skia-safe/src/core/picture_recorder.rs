@@ -14,7 +14,7 @@ impl NativeDrop for SkPictureRecorder {
     }
 }
 
-impl Handle<SkPictureRecorder> {
+impl PictureRecorder {
     pub fn new() -> Self {
         Self::construct(|pr| unsafe { sb::C_SkPictureRecorder_Construct(pr) })
     }

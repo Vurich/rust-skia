@@ -118,6 +118,16 @@
 #include "include/utils/SkShadowUtils.h"
 #include "include/utils/SkTextUtils.h"
 
+#if defined(SK_ENABLE_SKOTTIE)
+
+// modules
+#   include "modules/sksg/include/SkSGInvalidationController.h"
+#   include "modules/skottie/include/Skottie.h"
+#   include "modules/skottie/utils/SkottieUtils.h"
+#   include "modules/skresources/include/SkResources.h"
+
+#endif // defined(LOTTIE)
+
 //
 // codec/SkCodec.h
 //
@@ -2872,4 +2882,12 @@ extern "C" void C_SkInterpolator_setMirror(SkInterpolator* self, bool mirror) {
 
 extern "C" SkCanvas* C_SkMakeNullCanvas() {
     return SkMakeNullCanvas().release();
+}
+
+//
+// modules/skottie/include/Skottie.h
+//
+
+extern "C" skottie::Animation* C_skottie_Animation_MakeFromData(const char* data, size_t length) {
+    return skottie::Animation::Make(data, length).release();
 }

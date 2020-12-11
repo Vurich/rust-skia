@@ -33,7 +33,7 @@ impl NativeRefCountedBase for SkSurface {
     type Base = SkRefCntBase;
 }
 
-impl RCHandle<SkSurface> {
+impl Surface {
     pub fn new_raster_direct<'pixels>(
         image_info: &ImageInfo,
         pixels: &'pixels mut [u8],
@@ -85,7 +85,7 @@ impl RCHandle<SkSurface> {
 }
 
 #[cfg(feature = "gpu")]
-impl RCHandle<SkSurface> {
+impl Surface {
     pub fn from_backend_texture(
         context: &mut gpu::Context,
         backend_texture: &gpu::BackendTexture,
@@ -267,7 +267,7 @@ impl RCHandle<SkSurface> {
     }
 }
 
-impl RCHandle<SkSurface> {
+impl Surface {
     pub fn is_compatible(&self, characterization: &SurfaceCharacterization) -> bool {
         unsafe { self.native().isCompatible(characterization.native()) }
     }
@@ -302,7 +302,7 @@ impl RCHandle<SkSurface> {
 }
 
 #[cfg(feature = "gpu")]
-impl RCHandle<SkSurface> {
+impl Surface {
     #[deprecated(
         since = "0.35.0",
         note = "Use recordingContext() and RecordingContext::as_direct_context()"
@@ -377,7 +377,7 @@ impl RCHandle<SkSurface> {
     }
 }
 
-impl RCHandle<SkSurface> {
+impl Surface {
     pub fn canvas(&mut self) -> &mut Canvas {
         let canvas_ref = unsafe { &mut *self.native_mut().getCanvas() };
         Canvas::borrow_from_native(canvas_ref)

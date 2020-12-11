@@ -39,7 +39,7 @@ fn test_blur_shadow_rec_layout() {
     BlurShadowRec::test_layout()
 }
 
-impl RCHandle<SkDrawLooper> {
+impl DrawLooper {
     // TODO: Context
     // TODO: makeContext
 

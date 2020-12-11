@@ -1,9 +1,8 @@
 use crate::prelude::*;
 use crate::{image_filter::CropRect, image_filters, BlendMode, IRect, ImageFilter};
 use skia_bindings as sb;
-use skia_bindings::SkImageFilter;
 
-impl RCHandle<SkImageFilter> {
+impl ImageFilter {
     pub fn xfer_mode<'a>(
         blend_mode: BlendMode,
         background: impl Into<Option<ImageFilter>>,

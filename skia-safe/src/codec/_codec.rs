@@ -47,7 +47,7 @@ impl NativeRefCountedBase for SkCodec {
     type Base = SkRefCntBase;
 }
 
-impl RCHandle<SkCodec> {
+impl Codec {
     // TODO: wrap MakeFromStream
     // TODO: wrap from_data with SkPngChunkReader
 

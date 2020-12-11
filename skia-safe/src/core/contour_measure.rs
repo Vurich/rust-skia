@@ -25,7 +25,7 @@ impl Default for MatrixFlags {
     }
 }
 
-impl RCHandle<SkContourMeasure> {
+impl ContourMeasure {
     pub fn length(&self) -> scalar {
         unsafe { sb::C_SkContourMeasure_length(self.native()) }
     }
@@ -99,7 +99,7 @@ impl Iterator for Handle<SkContourMeasureIter> {
     }
 }
 
-impl Handle<SkContourMeasureIter> {
+impl ContourMeasureIter {
     // Canonical new:
     pub fn new(path: &Path, force_closed: bool, res_scale: impl Into<Option<scalar>>) -> Self {
         Self::from_path(path, force_closed, res_scale)

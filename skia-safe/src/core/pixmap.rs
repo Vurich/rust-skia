@@ -30,7 +30,7 @@ impl Default for Handle<SkPixmap> {
     }
 }
 
-impl Handle<SkPixmap> {
+impl Pixmap {
     pub fn new<'pixels>(
         info: &ImageInfo,
         pixels: &'pixels [u8],

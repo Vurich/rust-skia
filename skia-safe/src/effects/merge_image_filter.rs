@@ -4,7 +4,7 @@ use skia_bindings as sb;
 use skia_bindings::SkImageFilter;
 use std::convert::TryInto;
 
-impl RCHandle<SkImageFilter> {
+impl ImageFilter {
     pub fn merge<'a>(
         filters: impl IntoIterator<Item = Option<Self>>,
         crop_rect: impl Into<Option<&'a IRect>>,

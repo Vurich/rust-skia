@@ -3,7 +3,7 @@ use crate::{image_filter::CropRect, image_filters, scalar, IPoint, IRect, ISize,
 use skia_bindings as sb;
 use skia_bindings::SkImageFilter;
 
-impl RCHandle<SkImageFilter> {
+impl ImageFilter {
     #[allow(clippy::too_many_arguments)]
     pub fn matrix_convolution<'a>(
         self,

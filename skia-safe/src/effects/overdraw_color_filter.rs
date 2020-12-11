@@ -5,7 +5,7 @@ use skia_bindings::SkColorFilter;
 
 pub const NUM_COLORS: usize = 6;
 
-impl RCHandle<SkColorFilter> {
+impl ColorFilter {
     pub fn overdraw(colors: &[Color; NUM_COLORS]) -> ColorFilter {
         new(colors)
     }

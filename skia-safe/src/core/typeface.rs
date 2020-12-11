@@ -35,7 +35,7 @@ impl Default for RCHandle<SkTypeface> {
     }
 }
 
-impl RCHandle<SkTypeface> {
+impl Typeface {
     // Canonical new:
     pub fn new(family_name: impl AsRef<str>, font_style: FontStyle) -> Option<Self> {
         Self::from_name(family_name, font_style)

@@ -9,7 +9,7 @@ fn test_mode_naming() {
     let _ = Mode::Inverted;
 }
 
-impl RCHandle<SkPathEffect> {
+impl PathEffect {
     pub fn trim(
         start_t: scalar,
         stop_t: scalar,

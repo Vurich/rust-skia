@@ -195,7 +195,7 @@ impl Default for Handle<SkPath> {
     }
 }
 
-impl Handle<SkPath> {
+impl Path {
     /// Create a path from a set of points and the associated verbs. Verbs are here specified
     /// as bytes, one byte per verb. The `Verb` enum is 32 bits, and you can get the bytes needed
     /// for this function by simply using `foo_verb as u8`.

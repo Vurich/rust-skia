@@ -37,7 +37,7 @@ impl Default for Handle<SkSurfaceCharacterization> {
 
 // TODO: there is an alternative for when SK_SUPPORT_GPU is not set, of which the
 //       layout differs, should we support that?
-impl Handle<SkSurfaceCharacterization> {
+impl SurfaceCharacterization {
     #[cfg(feature = "gpu")]
     pub fn resized(&self, size: impl Into<crate::ISize>) -> Self {
         let size = size.into();
@@ -88,7 +88,7 @@ impl Handle<SkSurfaceCharacterization> {
 }
 
 #[cfg(feature = "gpu")]
-impl Handle<SkSurfaceCharacterization> {
+impl SurfaceCharacterization {
     // TODO: contextInfo() / refContextInfo()
 
     pub fn cache_max_resource_bytes(&self) -> usize {
@@ -169,7 +169,7 @@ impl Handle<SkSurfaceCharacterization> {
     }
 }
 
-impl Handle<SkSurfaceCharacterization> {
+impl SurfaceCharacterization {
     pub fn surface_props(&self) -> &SurfaceProps {
         SurfaceProps::from_native_ref(&self.native().fSurfaceProps)
     }

@@ -35,7 +35,7 @@ impl NativeClone for SkStrokeRec {
     }
 }
 
-impl Handle<SkStrokeRec> {
+impl StrokeRec {
     pub fn new(init_style: InitStyle) -> Self {
         Self::from_native_c(unsafe { SkStrokeRec::new(init_style) })
     }

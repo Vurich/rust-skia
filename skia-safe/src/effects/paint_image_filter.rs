@@ -3,13 +3,13 @@ use crate::{image_filter::CropRect, image_filters, IRect, ImageFilter, Paint};
 use skia_bindings as sb;
 use skia_bindings::{SkImageFilter, SkPaint};
 
-impl RCHandle<SkImageFilter> {
+impl ImageFilter {
     pub fn from_paint<'a>(paint: &Paint, crop_rect: impl Into<Option<&'a IRect>>) -> Option<Self> {
         image_filters::paint(paint, crop_rect)
     }
 }
 
-impl Handle<SkPaint> {
+impl Paint {
     pub fn as_image_filter<'a>(
         &self,
         crop_rect: impl Into<Option<&'a IRect>>,

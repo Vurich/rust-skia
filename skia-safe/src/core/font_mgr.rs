@@ -22,7 +22,7 @@ impl Default for RCHandle<SkFontStyleSet> {
     }
 }
 
-impl RCHandle<SkFontStyleSet> {
+impl FontStyleSet {
     pub fn count(&mut self) -> usize {
         unsafe {
             sb::C_SkFontStyleSet_count(self.native_mut())
@@ -88,7 +88,7 @@ impl Default for RCHandle<SkFontMgr> {
     }
 }
 
-impl RCHandle<SkFontMgr> {
+impl FontMgr {
     pub fn new() -> Self {
         FontMgr::from_ptr(unsafe { sb::C_SkFontMgr_RefDefault() }).unwrap()
     }

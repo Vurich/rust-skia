@@ -22,7 +22,7 @@ impl Index<usize> for DataTable {
     }
 }
 
-impl RCHandle<SkDataTable> {
+impl DataTable {
     pub fn is_empty(&self) -> bool {
         self.count() == 0
     }
@@ -88,7 +88,7 @@ impl RCHandle<SkDataTable> {
     // TODO: wrap MakeArrayProc()
 }
 
-impl RCHandle<SkDataTable> {
+impl DataTable {
     pub fn iter(&self) -> Iter {
         Iter {
             table: self,

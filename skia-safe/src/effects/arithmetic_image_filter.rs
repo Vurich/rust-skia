@@ -3,7 +3,7 @@ use crate::{image_filter, image_filters, IRect, ImageFilter};
 use skia_bindings as sb;
 use skia_bindings::SkImageFilter;
 
-impl RCHandle<SkImageFilter> {
+impl ImageFilter {
     #[allow(clippy::too_many_arguments)]
     pub fn arithmetic<'a>(
         inputs: impl Into<ArithmeticFPInputs>,

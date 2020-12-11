@@ -98,7 +98,7 @@ impl NativeDrop for SkDynamicMemoryWStream {
     }
 }
 
-impl Handle<SkDynamicMemoryWStream> {
+impl DynamicMemoryWStream {
     pub fn new() -> Self {
         Self::construct(|dmws| unsafe { sb::C_SkDynamicMemoryWStream_Construct(dmws) })
     }

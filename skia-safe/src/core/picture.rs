@@ -12,7 +12,7 @@ impl NativeRefCountedBase for SkPicture {
     type Base = SkRefCntBase;
 }
 
-impl RCHandle<SkPicture> {
+impl Picture {
     // TODO: wrap MakeFromStream
 
     // TODO: may support SkSerialProces in MakeFromData?

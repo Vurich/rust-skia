@@ -57,7 +57,7 @@ impl NativeRefCountedBase for SkImage {
     type Base = SkRefCntBase;
 }
 
-impl RCHandle<SkImage> {
+impl Image {
     // TODO: MakeRasterCopy()
 
     pub fn from_raster_data(

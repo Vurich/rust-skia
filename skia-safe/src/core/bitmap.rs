@@ -24,7 +24,7 @@ impl NativeClone for SkBitmap {
 
 // TODO: implement Default?
 
-impl Handle<SkBitmap> {
+impl Bitmap {
     pub fn new() -> Self {
         Self::construct(|bitmap| unsafe { sb::C_SkBitmap_Construct(bitmap) })
     }

@@ -3,7 +3,7 @@ use crate::{image_filter::CropRect, image_filters, scalar, IRect, ImageFilter, R
 use skia_bindings as sb;
 use skia_bindings::SkImageFilter;
 
-impl RCHandle<SkImageFilter> {
+impl ImageFilter {
     pub fn magnifier<'a>(
         self,
         crop_rect: impl Into<Option<&'a IRect>>,

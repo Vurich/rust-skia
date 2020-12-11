@@ -16,7 +16,7 @@ impl From<RCHandle<GrDirectContext>> for RCHandle<GrRecordingContext> {
     }
 }
 
-impl RCHandle<GrRecordingContext> {
+impl RecordingContext {
     // From GrContext_Base
     pub fn as_direct_context(&mut self) -> Option<DirectContext> {
         DirectContext::from_unshared_ptr(unsafe {

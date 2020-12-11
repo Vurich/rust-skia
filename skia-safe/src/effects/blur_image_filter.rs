@@ -3,7 +3,7 @@ use crate::{image_filter::CropRect, image_filters, scalar, IRect, ImageFilter};
 use skia_bindings as sb;
 use skia_bindings::{SkBlurImageFilter_TileMode, SkImageFilter};
 
-impl RCHandle<SkImageFilter> {
+impl ImageFilter {
     pub fn blur<'a>(
         self,
         crop_rect: impl Into<Option<&'a IRect>>,

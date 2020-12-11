@@ -26,7 +26,7 @@ impl Default for Handle<SkColorMatrix> {
     }
 }
 
-impl Handle<SkColorMatrix> {
+impl ColorMatrix {
     #[allow(clippy::too_many_arguments)]
     pub fn new(
         m00: f32,

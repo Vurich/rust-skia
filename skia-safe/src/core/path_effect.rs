@@ -96,7 +96,7 @@ impl NativeFlattenable for SkPathEffect {
     }
 }
 
-impl RCHandle<SkPathEffect> {
+impl PathEffect {
     pub fn sum(first: impl Into<PathEffect>, second: impl Into<PathEffect>) -> PathEffect {
         PathEffect::from_ptr(unsafe {
             sb::C_SkPathEffect_MakeSum(first.into().into_ptr(), second.into().into_ptr())

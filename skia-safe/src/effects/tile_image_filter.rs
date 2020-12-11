@@ -1,9 +1,8 @@
 use crate::prelude::*;
 use crate::{image_filters, ImageFilter, Rect};
 use skia_bindings as sb;
-use skia_bindings::SkImageFilter;
 
-impl RCHandle<SkImageFilter> {
+impl ImageFilter {
     pub fn tile(self, src: impl AsRef<Rect>, dst: impl AsRef<Rect>) -> Option<Self> {
         image_filters::tile(src, dst, self)
     }

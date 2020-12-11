@@ -31,7 +31,7 @@ impl Default for Handle<SkInterpolator> {
 }
 
 /// Wrapper for functions that are implemented in SkInterpolatorBase
-impl Handle<SkInterpolator> {
+impl Interpolator {
     pub fn duration(&self) -> Option<(Duration, Duration)> {
         let mut start_time = 0;
         let mut end_time = 0;
@@ -87,7 +87,7 @@ impl Handle<SkInterpolator> {
 }
 
 /// Wrapper for SkInterpolator functions.
-impl Handle<SkInterpolator> {
+impl Interpolator {
     pub fn new(elem_count: usize, frame_count: usize) -> Self {
         Handle::from_native_c(unsafe {
             SkInterpolator::new1(
@@ -145,7 +145,7 @@ impl Handle<SkInterpolator> {
 }
 
 /// Additional functions that seem useful.
-impl Handle<SkInterpolator> {
+impl Interpolator {
     pub fn elem_count(&self) -> usize {
         self.native()._base.fElemCount.try_into().unwrap()
     }

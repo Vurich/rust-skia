@@ -2,7 +2,7 @@ use crate::prelude::*;
 use crate::{scalar, Matrix, Path, PathEffect};
 use skia_bindings::SkPathEffect;
 
-impl RCHandle<SkPathEffect> {
+impl PathEffect {
     pub fn line_2d(width: scalar, matrix: &Matrix) -> Option<PathEffect> {
         line_2d_path_effect::new(width, matrix)
     }

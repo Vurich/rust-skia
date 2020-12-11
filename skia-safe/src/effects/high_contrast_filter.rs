@@ -49,7 +49,7 @@ impl HighContrastConfig {
     }
 }
 
-impl RCHandle<SkColorFilter> {
+impl ColorFilter {
     pub fn high_contrast(config: &HighContrastConfig) -> Option<Self> {
         new(config)
     }

@@ -31,7 +31,7 @@ impl NativeFlattenable for SkColorFilter {
     }
 }
 
-impl RCHandle<SkColorFilter> {
+impl ColorFilter {
     pub fn to_a_color_mode(&self) -> Option<(Color, BlendMode)> {
         let mut color: Color = 0.into();
         let mut mode: BlendMode = Default::default();

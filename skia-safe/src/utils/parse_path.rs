@@ -17,7 +17,7 @@ pub fn to_svg(path: &Path) -> String {
     svg.as_str().into()
 }
 
-impl Handle<SkPath> {
+impl Path {
     pub fn from_svg(svg: impl AsRef<str>) -> Option<Path> {
         from_svg(svg)
     }

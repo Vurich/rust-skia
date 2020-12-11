@@ -31,7 +31,7 @@ impl Default for Handle<SkPathMeasure> {
     }
 }
 
-impl Handle<SkPathMeasure> {
+impl PathMeasure {
     // Canonical new:
     pub fn new(path: &Path, force_closed: bool, res_scale: impl Into<Option<scalar>>) -> Self {
         Self::from_path(path, force_closed, res_scale)

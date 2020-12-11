@@ -107,7 +107,7 @@ impl NativeFlattenable for SkImageFilter {
     }
 }
 
-impl RCHandle<SkImageFilter> {
+impl ImageFilter {
     // TODO: wrapfilterImage()? SkSpecialImage is declared in src/core/
 
     pub fn filter_bounds<'a>(

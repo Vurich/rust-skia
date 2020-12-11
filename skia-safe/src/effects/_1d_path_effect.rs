@@ -2,7 +2,7 @@ use crate::prelude::*;
 use crate::{scalar, Path, PathEffect};
 use skia_bindings::SkPathEffect;
 
-impl RCHandle<SkPathEffect> {
+impl PathEffect {
     pub fn path_1d(
         path: &Path,
         advance: scalar,

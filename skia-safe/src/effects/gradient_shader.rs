@@ -3,7 +3,7 @@ use crate::{scalar, Color, Color4f, ColorSpace, Matrix, Point, Shader, TileMode}
 use skia_bindings as sb;
 use skia_bindings::SkShader;
 
-impl RCHandle<SkShader> {
+impl Shader {
     pub fn linear_gradient<'a>(
         points: (impl Into<Point>, impl Into<Point>),
         colors: impl Into<GradientShaderColors<'a>>,

@@ -35,7 +35,7 @@ fn test_region_op_naming() {
     let _ = RegionOp::ReverseDifference;
 }
 
-impl Handle<SkRegion> {
+impl Region {
     pub fn new() -> Region {
         Self::from_native_c(unsafe { SkRegion::new() })
     }

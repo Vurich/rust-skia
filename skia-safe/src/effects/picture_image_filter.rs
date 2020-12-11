@@ -3,7 +3,7 @@ use crate::{image_filters, ImageFilter, Picture, Rect};
 use skia_bindings as sb;
 use skia_bindings::{SkImageFilter, SkPicture};
 
-impl RCHandle<SkImageFilter> {
+impl ImageFilter {
     pub fn from_picture<'a>(
         picture: impl Into<Picture>,
         crop_rect: impl Into<Option<&'a Rect>>,
@@ -12,7 +12,7 @@ impl RCHandle<SkImageFilter> {
     }
 }
 
-impl RCHandle<SkPicture> {
+impl Picture {
     pub fn as_image_filter<'a>(
         &self,
         crop_rect: impl Into<Option<&'a Rect>>,

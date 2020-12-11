@@ -25,7 +25,7 @@ impl NativeRefCounted for SkTextBlob {
     }
 }
 
-impl RCHandle<SkTextBlob> {
+impl TextBlob {
     pub fn new(str: impl AsRef<str>, font: &Font) -> Option<Self> {
         Self::from_str(str, font)
     }
@@ -145,7 +145,7 @@ impl NativeDrop for SkTextBlobBuilder {
     }
 }
 
-impl Handle<SkTextBlobBuilder> {
+impl TextBlobBuilder {
     pub fn new() -> Self {
         Self::from_native_c(unsafe { SkTextBlobBuilder::new() })
     }

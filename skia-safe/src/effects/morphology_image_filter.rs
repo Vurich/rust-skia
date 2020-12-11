@@ -1,8 +1,7 @@
 use crate::prelude::*;
-use crate::{image_filters, scalar, IRect};
-use skia_bindings::SkImageFilter;
+use crate::{image_filters, ImageFilter, scalar, IRect};
 
-impl RCHandle<SkImageFilter> {
+impl ImageFilter {
     pub fn dilate<'a>(
         self,
         crop_rect: impl Into<Option<&'a IRect>>,

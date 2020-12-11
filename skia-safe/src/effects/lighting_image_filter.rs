@@ -3,7 +3,7 @@ use crate::{image_filter::CropRect, image_filters, scalar, Color, IRect, ImageFi
 use skia_bindings as sb;
 use skia_bindings::SkImageFilter;
 
-impl RCHandle<SkImageFilter> {
+impl ImageFilter {
     pub fn distant_lit_diffuse_lighting<'a>(
         self,
         crop_rect: impl Into<Option<&'a IRect>>,

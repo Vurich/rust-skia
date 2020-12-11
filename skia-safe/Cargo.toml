@@ -20,21 +20,38 @@ edition = "2018"
 doctest = false
 
 [features]
-default = ["x11", "pdf", "xml"]
-skvm-jit = ["skia-bindings/skvm-jit"]
-xml = ["skia-bindings/xml"]
+# Support for Lottie/Bodymovin files
+lottie = ["skia-bindings/lottie"]
+# PDF rendering backend
 pdf = ["skia-bindings/pdf"]
+# OpenGL rendering backend
 gl = ["gpu", "skia-bindings/gl"]
-egl = ["gl", "skia-bindings/egl"]
-wayland = ["egl", "skia-bindings/wayland"]
-x11 = ["gl", "skia-bindings/x11"]
+# Vulkan rendering backend
 vulkan = ["gpu", "skia-bindings/vulkan"]
+# Metal rendering backend
 metal = ["gpu", "skia-bindings/metal"]
+# DirectX rendering backend
 d3d = ["gpu", "winapi", "wio", "skia-bindings/d3d"]
+# EGL backend for context management
+egl = ["gl", "skia-bindings/egl"]
+# Support for EGL on Wayland
+wayland = ["egl", "skia-bindings/wayland"]
+# GLX backend for context management
+x11 = ["gl", "skia-bindings/x11"]
+# Enable the text layout engine
 textlayout = ["skia-bindings/textlayout"]
+
+# Support for the WebP image format
 webp = ["webp-encode", "webp-decode"]
+# Allow writing to WebP files
 webp-encode = ["skia-bindings/webp-encode"]
+# Allow reading from WebP files
 webp-decode = ["skia-bindings/webp-decode"]
+
+# By default, the PDF backend is enabled. X11 is enabled here but it does nothing unless `gl`
+# is also enabled. This is to preserve the previous behaviour where `gl` enabled GLX, while
+# also allowing consumers to opt out of linking with libGL (for systems without X11).
+default = ["x11", "pdf"]
 
 # implied only, do not use
 gpu = []

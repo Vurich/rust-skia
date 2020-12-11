@@ -141,7 +141,7 @@ impl NativeRefCounted for SkVertices {
     }
 }
 
-impl RCHandle<SkVertices> {
+impl Vertices {
     pub fn new_copy(
         mode: VertexMode,
         positions: &[Point],
@@ -301,7 +301,7 @@ impl NativeDrop for SkVertices_Builder {
     }
 }
 
-impl Handle<SkVertices_Builder> {
+impl Builder {
     pub fn new(
         mode: VertexMode,
         vertex_count: usize,

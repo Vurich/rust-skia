@@ -12,7 +12,7 @@ impl NativeRefCountedBase for SkPixelRef {
     type Base = SkRefCntBase;
 }
 
-impl RCHandle<SkPixelRef> {
+impl PixelRef {
     // TODO: wrap constructor with pixels borrowed.
 
     pub fn dimensions(&self) -> ISize {

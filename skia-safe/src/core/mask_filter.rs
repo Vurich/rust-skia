@@ -24,7 +24,7 @@ impl NativeFlattenable for SkMaskFilter {
     }
 }
 
-impl RCHandle<SkMaskFilter> {
+impl MaskFilter {
     pub fn blur(
         style: BlurStyle,
         sigma: scalar,

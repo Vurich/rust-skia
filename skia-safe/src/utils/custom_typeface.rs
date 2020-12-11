@@ -13,7 +13,7 @@ impl NativeDrop for SkCustomTypefaceBuilder {
     }
 }
 
-impl Handle<SkCustomTypefaceBuilder> {
+impl CustomTypefaceBuilder {
     pub fn new() -> Self {
         Self::from_native_c(unsafe { SkCustomTypefaceBuilder::new() })
     }

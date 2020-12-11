@@ -113,7 +113,7 @@ impl Default for Handle<SkColorInfo> {
     }
 }
 
-impl Handle<SkColorInfo> {
+impl ColorInfo {
     pub fn new(ct: ColorType, at: AlphaType, cs: impl Into<Option<ColorSpace>>) -> Self {
         Self::construct(|color_info| unsafe {
             sb::C_SkColorInfo_Construct2(
@@ -199,7 +199,7 @@ impl Default for Handle<SkImageInfo> {
     }
 }
 
-impl Handle<SkImageInfo> {
+impl ImageInfo {
     pub fn new(
         dimensions: impl Into<ISize>,
         ct: ColorType,

@@ -49,7 +49,7 @@ impl Default for Handle<SkOpBuilder> {
     }
 }
 
-impl Handle<SkOpBuilder> {
+impl OpBuilder {
     pub fn add(&mut self, path: &Path, operator: PathOp) -> &mut Self {
         unsafe {
             self.native_mut().add(path.native(), operator);
@@ -63,7 +63,7 @@ impl Handle<SkOpBuilder> {
     }
 }
 
-impl Handle<SkPath> {
+impl Path {
     pub fn op(&self, path: &Path, path_op: PathOp) -> Option<Self> {
         op(self, path, path_op)
     }

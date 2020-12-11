@@ -16,7 +16,7 @@ impl NativeDrop for SkStrings {
     }
 }
 
-impl Handle<SkStrings> {
+impl Strings {
     /// Constructs a native Strings array from a slice of SkStrings by moving them.
     pub fn new(mut strings: Vec<String>) -> Self {
         Strings::construct(|s| unsafe {

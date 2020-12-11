@@ -38,7 +38,7 @@ impl PartialEq for RCHandle<SkData> {
     }
 }
 
-impl RCHandle<SkData> {
+impl Data {
     pub fn size(&self) -> usize {
         self.native().fSize
     }

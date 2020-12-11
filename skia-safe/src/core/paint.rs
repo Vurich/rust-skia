@@ -60,7 +60,7 @@ impl Default for Handle<SkPaint> {
     }
 }
 
-impl Handle<SkPaint> {
+impl Paint {
     pub fn new(color: impl AsRef<Color4f>, color_space: Option<&ColorSpace>) -> Paint {
         Paint::from_native_c(unsafe {
             SkPaint::new1(

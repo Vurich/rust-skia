@@ -3,7 +3,7 @@ use crate::{image_filter::CropRect, image_filters, IRect, ImageFilter, Vector};
 use skia_bindings as sb;
 use skia_bindings::SkImageFilter;
 
-impl RCHandle<SkImageFilter> {
+impl ImageFilter {
     pub fn offset<'a>(
         self,
         crop_rect: impl Into<Option<&'a IRect>>,

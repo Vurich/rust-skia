@@ -3,7 +3,7 @@ use crate::{image_filter::CropRect, image_filters, scalar, ColorChannel, IRect, 
 use skia_bindings as sb;
 use skia_bindings::SkImageFilter;
 
-impl RCHandle<SkImageFilter> {
+impl ImageFilter {
     pub fn displacement_map_effect<'a>(
         channel_selectors: (ColorChannel, ColorChannel),
         scale: scalar,
