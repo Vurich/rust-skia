@@ -12,7 +12,7 @@ bitflags::bitflags! {
     #[derive(Default)]
     pub struct BuilderFlags: u32 {
         /// Normally, any static images are resolved at load time. This defers loading of images to
-        /// when you call [Animation::seek].
+        /// when you call `Animation::seek_frame`/`Animation::seek_time`.
         const DEFER_IMAGE_LOADING = sb::skottie_Animation_Builder_Flags_kDeferImageLoading as _;
         /// By default Skia will use native typefaces when possible, but supplying this flag will cause
         /// Skia to use the fallback glyph paths by default.
@@ -133,6 +133,28 @@ impl NativeRefCounted for sb::skottie_Animation {
     }
 }
 
+/// Regions that would be drawn to by `Animation::render` after the most-recent `Animation::seek_frame`
+/// or `Animation::seek_time`.
+struct DirtyRegion(sb::sksg_InvalidationController);
+
+/// A possible result for `Animation::seek_frame` and `Animation::seek_time`. These functions
+/// can optionally mark regions that would be made dirty, but instead of an optional, mutable
+/// argument we instead use generic return types to capture this.
+///
+/// This trait is `unsafe` because the implementor must ensure that `as_invalidation_controller_ptr_mut`
+/// returns a pointer that is valid for use in `Animation::seek_frame` or `Animation::seek_time`. The
+/// definition of exactly what that means is left undefined for now, and this trait can be considered
+/// internal.
+pub unsafe trait SeekResult: Default {
+    fn as_invalidation_controller_ptr_mut(&mut self) -> *mut sb::sksg_InvalidationController;
+}
+
+unsafe impl SeekResult for () {
+    fn as_invalidation_controller_ptr_mut(&mut self) -> *mut sb::sksg_InvalidationController {
+        std::ptr::null_mut()
+    }
+}
+
 impl Animation {
     /// Parse the supplied .lottie file data and return an animation. Returns [None] if the data is
     /// somehow invalid.
@@ -206,5 +228,36 @@ impl Animation {
                 flags.bits(),
             )
         }
+    }
+
+    /// Seek to the specified frame. Inputs with fractional components (such as 0.5, 1.2) will show the
+    /// interpolated frame between the closest whole keyframes before and after.
+    ///
+    /// This function can optionally return a [DirtyRegion], see that type's documentation for what this
+    /// means. If in doubt, keep with the default return type of `()`.
+    pub fn seek_frame<O: SeekResult>(&mut self, frame: f64) -> O {
+        let mut out = O::default();
+
+        unsafe {
+            self.native_mut()
+                .seekFrame(frame, out.as_invalidation_controller_ptr_mut());
+        }
+
+        out
+    }
+
+    /// Seek to the specified time in the animation.
+    ///
+    /// This function can optionally return a [DirtyRegion], see that type's documentation for what this
+    /// means. If in doubt, keep with the default return type of `()`.
+    pub fn seek_time<O: SeekResult>(&mut self, time: f64) -> O {
+        let mut out = O::default();
+
+        unsafe {
+            self.native_mut()
+                .seekFrameTime(time, out.as_invalidation_controller_ptr_mut());
+        }
+
+        out
     }
 }
