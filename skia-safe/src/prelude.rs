@@ -1,6 +1,6 @@
 use skia_bindings::{
-    C_SkRefCntBase_ref, C_SkRefCntBase_unique, C_SkRefCntBase_unref, SkNVRefCnt, SkRefCnt,
-    SkRefCntBase,
+    self as sb, C_SkRefCntBase_ref, C_SkRefCntBase_unique, C_SkRefCntBase_unref, SkNVRefCnt,
+    SkRefCnt, SkRefCntBase,
 };
 use std::hash::{Hash, Hasher};
 use std::mem::MaybeUninit;
@@ -470,6 +470,17 @@ impl<N: NativeDrop> RefHandle<N> {
 /// to the native type.
 #[repr(transparent)]
 pub struct RCHandle<Native: NativeRefCounted>(ptr::NonNull<Native>);
+
+impl<N: NativeRefCounted> From<RCHandle<N>> for sb::sk_sp<N> {
+    fn from(other: RCHandle<N>) -> Self {
+        let mut other = std::mem::ManuallyDrop::new(other);
+
+        Self {
+            fPtr: unsafe { other.0.as_mut() },
+            _phantom_0: std::marker::PhantomData,
+        }
+    }
+}
 
 /// A reference counted handle is cheap to clone, so we do support a conversion
 /// from a reference to a ref counter to an owned handle.

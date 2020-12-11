@@ -2891,3 +2891,16 @@ extern "C" SkCanvas* C_SkMakeNullCanvas() {
 extern "C" skottie::Animation* C_skottie_Animation_MakeFromData(const char* data, size_t length) {
     return skottie::Animation::Make(data, length).release();
 }
+
+extern "C" void C_skottie_Animation_ref(const skottie::Animation* self) {
+    self->ref();
+}
+
+extern "C" void C_skottie_Animation_unref(const skottie::Animation* self) {
+    self->unref();
+}
+
+extern "C" bool C_skottie_Animation_unique(const skottie::Animation* self) {
+    return self->unique();
+}
+
