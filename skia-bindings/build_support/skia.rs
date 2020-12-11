@@ -38,6 +38,9 @@ impl Default for BuildConfiguration {
             opt_level: cargo::env_var("OPT_LEVEL"),
             features: Features {
                 gl: cfg!(feature = "gl"),
+                skvm_jit: cfg!(feature = "skvm-jit"),
+                xml: cfg!(feature = "xml"),
+                pdf: cfg!(feature = "pdf"),
                 egl: cfg!(feature = "egl"),
                 wayland: cfg!(feature = "wayland"),
                 x11: cfg!(feature = "x11"),
@@ -88,6 +91,15 @@ pub struct BuildConfiguration {
 pub struct Features {
     /// Build with OpenGL support?
     pub gl: bool,
+
+    /// Build with (experimental) JIT support for SKVM?
+    pub skvm_jit: bool,
+
+    /// Build with XML support? This is supplied by expat, and always enabled for Android targets.
+    pub xml: bool,
+
+    /// Build with PDF backend?
+    pub pdf: bool,
 
     /// Build with EGL support? If you set X11, setting this to false will use LibGL (GLX)
     pub egl: bool,
@@ -196,7 +208,14 @@ impl FinalBuildConfiguration {
             let mut args: Vec<(&str, String)> = vec![
                 ("is_official_build", yes_if(!build.skia_debug)),
                 ("is_debug", yes_if(build.skia_debug)),
+                // This is enabled by default but isn't usable from Rust anyway
+                // since it's a template-based UI-building library.
+                ("skia_enable_skrive", no()),
                 ("skia_enable_gpu", yes_if(features.gpu())),
+                (
+                    "skia_enable_skvm_jit_when_possible",
+                    yes_if(features.skvm_jit),
+                ),
                 ("skia_use_gl", yes_if(features.gl)),
                 ("skia_use_egl", yes_if(features.egl)),
                 ("skia_use_x11", yes_if(features.x11)),
@@ -255,7 +274,7 @@ impl FinalBuildConfiguration {
                 args.push(("skia_use_system_libwebp", no()))
             }
 
-            let mut use_expat = true;
+            let mut use_expat = features.xml;
 
             // target specific gn args.
             let target = cargo::target();
@@ -264,6 +283,10 @@ impl FinalBuildConfiguration {
             let opt_level_arg;
             let mut cflags: Vec<&str> = vec![&target_str];
             let asmflags: Vec<&str> = vec![&target_str];
+
+            if features.skvm_jit {
+                cflags.push("-DSKVM_LLVM");
+            }
 
             if let Some(sysroot) = cargo::env_var("SDKROOT") {
                 sysroot_arg = format!("--sysroot={}", sysroot);
@@ -459,6 +482,10 @@ impl BinariesConfiguration {
         }
 
         let mut link_libraries = Vec::new();
+
+        if features.skvm_jit {
+            link_libraries.push("LLVM-10");
+        }
 
         match target.as_strs() {
             (_, "unknown", "linux", Some("gnu")) => {
