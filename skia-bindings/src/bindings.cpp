@@ -126,7 +126,7 @@
 #   include "modules/skottie/utils/SkottieUtils.h"
 #   include "modules/skresources/include/SkResources.h"
 
-#endif // defined(LOTTIE)
+#endif // defined(SK_ENABLE_SKOTTIE)
 
 //
 // codec/SkCodec.h
@@ -2884,6 +2884,8 @@ extern "C" SkCanvas* C_SkMakeNullCanvas() {
     return SkMakeNullCanvas().release();
 }
 
+#if defined(SK_ENABLE_SKOTTIE)
+
 //
 // modules/skottie/include/Skottie.h
 //
@@ -2908,3 +2910,4 @@ extern "C" bool C_skottie_Animation_unique(const skottie::Animation* self) {
     return self->unique();
 }
 
+#endif // defined(SK_ENABLE_SKOTTIE)
