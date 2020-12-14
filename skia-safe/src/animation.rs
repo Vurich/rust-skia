@@ -145,6 +145,25 @@ impl NativeRefCounted for sb::skottie_Animation {
 /// or `Animation::seek_time`.
 pub struct DirtyRegion(sb::sksg_InvalidationController);
 
+impl Default for DirtyRegion {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
+impl DirtyRegion {
+    fn new() -> Self {
+        Self(unsafe { sb::sksg_InvalidationController::new() })
+    }
+
+    /// The bounding box of the region that would be dirtied by the change from the previous frame
+    /// to the one that was just seeked to. This is relative to the animation, and if the animation
+    /// would be transformed then you should transform these bounds to get the final bounding box.
+    pub fn bounds(&self) -> Rect {
+        self.0.fBounds.into()
+    }
+}
+
 /// A possible result for `Animation::seek_frame` and `Animation::seek_time`. These functions
 /// can optionally mark regions that would be made dirty, but instead of an optional, mutable
 /// argument we instead use generic return types to capture this.
@@ -160,6 +179,12 @@ pub unsafe trait SeekResult: Default {
 unsafe impl SeekResult for () {
     fn as_invalidation_controller_ptr_mut(&mut self) -> *mut sb::sksg_InvalidationController {
         std::ptr::null_mut()
+    }
+}
+
+unsafe impl SeekResult for DirtyRegion {
+    fn as_invalidation_controller_ptr_mut(&mut self) -> *mut sb::sksg_InvalidationController {
+        &mut self.0
     }
 }
 
@@ -220,9 +245,7 @@ impl Animation {
             sb::skottie_Animation::render(
                 self.native() as &_,
                 canvas.native_mut(),
-                dst.as_ref()
-                    .map(|r| r.native() as *const _)
-                    .unwrap_or(std::ptr::null()),
+                dst.as_ref().map(|r| r.native() as *const _).unwrap_or(std::ptr::null()),
             )
         }
     }
@@ -242,9 +265,7 @@ impl Animation {
             sb::skottie_Animation::render1(
                 self.native() as &_,
                 canvas.native_mut(),
-                dst.as_ref()
-                    .map(|r| r.native() as *const _)
-                    .unwrap_or(std::ptr::null()),
+                dst.as_ref().map(|r| r.native() as *const _).unwrap_or(std::ptr::null()),
                 flags.bits(),
             )
         }
@@ -259,8 +280,7 @@ impl Animation {
         let mut out = O::default();
 
         unsafe {
-            self.native_mut()
-                .seekFrame(frame, out.as_invalidation_controller_ptr_mut());
+            self.native_mut().seekFrame(frame, out.as_invalidation_controller_ptr_mut());
         }
 
         out
@@ -274,8 +294,7 @@ impl Animation {
         let mut out = O::default();
 
         unsafe {
-            self.native_mut()
-                .seekFrameTime(time, out.as_invalidation_controller_ptr_mut());
+            self.native_mut().seekFrameTime(time, out.as_invalidation_controller_ptr_mut());
         }
 
         out

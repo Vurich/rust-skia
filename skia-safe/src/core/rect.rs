@@ -30,12 +30,7 @@ impl AsRef<IRect> for IRect {
 
 impl IRect {
     pub const fn new(left: i32, top: i32, right: i32, bottom: i32) -> Self {
-        Self {
-            left,
-            top,
-            right,
-            bottom,
-        }
+        Self { left, top, right, bottom }
     }
 
     pub const fn new_empty() -> Self {
@@ -56,12 +51,7 @@ impl IRect {
     }
 
     pub fn from_xywh(x: i32, y: i32, w: i32, h: i32) -> Self {
-        IRect {
-            left: x,
-            top: y,
-            right: sk32::sat_add(x, w),
-            bottom: sk32::sat_add(y, h),
-        }
+        IRect { left: x, top: y, right: sk32::sat_add(x, w), bottom: sk32::sat_add(y, h) }
     }
 
     pub fn left(&self) -> i32 {
@@ -279,12 +269,7 @@ impl IRect {
     }
 }
 
-pub const EMPTY_IRECT: IRect = IRect {
-    left: 0,
-    top: 0,
-    right: 0,
-    bottom: 0,
-};
+pub const EMPTY_IRECT: IRect = IRect { left: 0, top: 0, right: 0, bottom: 0 };
 
 impl Contains<IPoint> for IRect {
     fn contains(&self, other: IPoint) -> bool {
@@ -333,6 +318,12 @@ pub struct Rect {
 
 impl NativeTransmutable<SkRect> for Rect {}
 
+impl From<SkRect> for Rect {
+    fn from(other: SkRect) -> Self {
+        Self { left: other.fLeft, top: other.fTop, right: other.fRight, bottom: other.fBottom }
+    }
+}
+
 #[test]
 fn test_rect_layout() {
     Rect::test_layout();
@@ -346,12 +337,7 @@ impl AsRef<Rect> for Rect {
 
 impl Rect {
     pub fn new(left: scalar, top: scalar, right: scalar, bottom: scalar) -> Self {
-        Self {
-            left,
-            top,
-            right,
-            bottom,
-        }
+        Self { left, top, right, bottom }
     }
 
     pub fn new_empty() -> Self {
@@ -554,32 +540,17 @@ impl Rect {
 
     pub fn with_offset(&self, d: impl Into<Vector>) -> Self {
         let d = d.into();
-        Self::new(
-            self.left + d.x,
-            self.top + d.y,
-            self.right + d.x,
-            self.bottom + d.y,
-        )
+        Self::new(self.left + d.x, self.top + d.y, self.right + d.x, self.bottom + d.y)
     }
 
     pub fn with_inset(&self, d: impl Into<Vector>) -> Self {
         let d = d.into();
-        Self::new(
-            self.left + d.x,
-            self.top + d.y,
-            self.right - d.x,
-            self.bottom - d.y,
-        )
+        Self::new(self.left + d.x, self.top + d.y, self.right - d.x, self.bottom - d.y)
     }
 
     pub fn with_outset(&self, d: impl Into<Vector>) -> Self {
         let d = d.into();
-        Self::new(
-            self.left - d.x,
-            self.top - d.y,
-            self.right + d.x,
-            self.bottom + d.y,
-        )
+        Self::new(self.left - d.x, self.top - d.y, self.right + d.x, self.bottom + d.y)
     }
 
     pub fn offset(&mut self, d: impl Into<Vector>) {
@@ -620,10 +591,7 @@ impl Rect {
 
     #[must_use]
     pub fn intersect2(&mut self, a: impl AsRef<Rect>, b: impl AsRef<Rect>) -> bool {
-        unsafe {
-            self.native_mut()
-                .intersect1(a.as_ref().native(), b.as_ref().native())
-        }
+        unsafe { self.native_mut().intersect1(a.as_ref().native(), b.as_ref().native()) }
     }
 
     #[deprecated(since = "0.19.0", note = "use intersects()")]
@@ -634,16 +602,7 @@ impl Rect {
         right: scalar,
         bottom: scalar,
     ) -> bool {
-        Self::intersects_(
-            self.left,
-            self.top,
-            self.right,
-            self.bottom,
-            left,
-            top,
-            right,
-            bottom,
-        )
+        Self::intersects_(self.left, self.top, self.right, self.bottom, left, top, right, bottom)
     }
 
     pub fn intersects(&self, r: impl AsRef<Rect>) -> bool {
@@ -819,12 +778,7 @@ impl RoundOut<IRect> for Rect {
 
 impl RoundOut<Rect> for Rect {
     fn round_out(&self) -> Rect {
-        Rect::new(
-            self.left.floor(),
-            self.top.floor(),
-            self.right.ceil(),
-            self.bottom.ceil(),
-        )
+        Rect::new(self.left.floor(), self.top.floor(), self.right.ceil(), self.bottom.ceil())
     }
 }
 
@@ -834,23 +788,13 @@ impl RoundOut<Rect> for Rect {
 
 impl From<(IPoint, ISize)> for IRect {
     fn from((point, size): (IPoint, ISize)) -> Self {
-        IRect::new(
-            point.x,
-            point.y,
-            point.x + size.width,
-            point.y + size.height,
-        )
+        IRect::new(point.x, point.y, point.x + size.width, point.y + size.height)
     }
 }
 
 impl From<(Point, Size)> for Rect {
     fn from((point, size): (Point, Size)) -> Self {
-        Rect::new(
-            point.x,
-            point.y,
-            point.x + size.width,
-            point.y + size.height,
-        )
+        Rect::new(point.x, point.y, point.x + size.width, point.y + size.height)
     }
 }
 
