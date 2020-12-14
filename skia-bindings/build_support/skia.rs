@@ -3,6 +3,7 @@
 use crate::build_support::{android, binaries, cargo, clang, ios, llvm, vs, xcode};
 use bindgen::{CodegenConfig, EnumVariation};
 use cc::Build;
+use std::collections::HashSet;
 use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
 use std::{env, fs};
@@ -13,6 +14,8 @@ mod lib {
     pub const SKIA_BINDINGS: &str = "skia-bindings";
     pub const SKSHAPER: &str = "skshaper";
     pub const SKPARAGRAPH: &str = "skparagraph";
+    pub const SKOTTIE: &str = "skottie";
+    pub const SKSG: &str = "sksg";
 }
 
 /// Feature identifiers define the additional configuration parts of the binaries to download.
@@ -370,12 +373,19 @@ impl FinalBuildConfiguration {
         let ninja_files = {
             let mut files = Vec::new();
             files.push("obj/skia.ninja".into());
+
             if features.text_layout {
                 files.extend(vec![
                     "obj/modules/skshaper/skshaper.ninja".into(),
                     "obj/modules/skparagraph/skparagraph.ninja".into(),
                 ]);
             }
+
+            if features.lottie {
+                files.push("obj/modules/skottie/skottie.ninja".into());
+                files.push("obj/modules/sksg/sksg.ninja".into());
+            }
+
             files
         };
 
@@ -467,14 +477,20 @@ impl BinariesConfiguration {
         let features = &build.features;
         let target = cargo::target();
 
-        let mut built_libraries = Vec::new();
+        let mut built_libraries = HashSet::new();
         let mut additional_files = Vec::new();
         let feature_ids = features.ids();
 
         if features.text_layout {
             additional_files.push(ICUDTL_DAT.into());
-            built_libraries.push(lib::SKPARAGRAPH.into());
-            built_libraries.push(lib::SKSHAPER.into());
+            built_libraries.insert(lib::SKPARAGRAPH.into());
+            built_libraries.insert(lib::SKSHAPER.into());
+        }
+
+        if features.lottie {
+            built_libraries.insert(lib::SKOTTIE.into());
+            built_libraries.insert(lib::SKSHAPER.into());
+            built_libraries.insert(lib::SKSG.into());
         }
 
         let mut link_libraries = Vec::new();
@@ -537,8 +553,8 @@ impl BinariesConfiguration {
             .unwrap()
             .into();
 
-        built_libraries.push(lib::SKIA.into());
-        built_libraries.push(lib::SKIA_BINDINGS.into());
+        built_libraries.insert(lib::SKIA.into());
+        built_libraries.insert(lib::SKIA_BINDINGS.into());
 
         BinariesConfiguration {
             feature_ids: feature_ids.into_iter().map(|f| f.to_string()).collect(),
@@ -547,7 +563,7 @@ impl BinariesConfiguration {
                 .into_iter()
                 .map(|lib| lib.to_string())
                 .collect(),
-            built_libraries,
+            built_libraries: built_libraries.into_iter().collect(),
             additional_files,
             skia_debug: build.skia_debug,
         }

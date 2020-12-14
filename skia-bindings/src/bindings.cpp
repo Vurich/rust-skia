@@ -2892,6 +2892,10 @@ extern "C" skottie::Animation* C_skottie_Animation_MakeFromData(const char* data
     return skottie::Animation::Make(data, length).release();
 }
 
+extern "C" skottie::Animation* C_skottie_Animation_MakeFromFile(const char* name) {
+    return skottie::Animation::MakeFromFile(name).release();
+}
+
 extern "C" void C_skottie_Animation_ref(const skottie::Animation* self) {
     self->ref();
 }

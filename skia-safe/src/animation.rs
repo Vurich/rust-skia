@@ -4,7 +4,7 @@ use std::{
     path::Path,
 };
 
-use crate::{prelude::*, Canvas, FontMgr, RCHandle, Rect};
+use crate::{prelude::*, Canvas, FontMgr, RCHandle, Rect, Size};
 use skia_bindings as sb;
 
 bitflags::bitflags! {
@@ -135,7 +135,7 @@ impl NativeRefCounted for sb::skottie_Animation {
 
 /// Regions that would be drawn to by `Animation::render` after the most-recent `Animation::seek_frame`
 /// or `Animation::seek_time`.
-struct DirtyRegion(sb::sksg_InvalidationController);
+pub struct DirtyRegion(sb::sksg_InvalidationController);
 
 /// A possible result for `Animation::seek_frame` and `Animation::seek_time`. These functions
 /// can optionally mark regions that would be made dirty, but instead of an optional, mutable
@@ -163,9 +163,9 @@ impl Animation {
     /// the file requests an external resource. If you want to be able to load external files,
     /// see [Builder].
     pub fn from_data(data: &[u8]) -> Option<Self> {
-        Self::from_ptr(
-            unsafe { sb::skottie_Animation::Make(data.as_ptr() as *const i8, data.len()) }.fPtr,
-        )
+        Self::from_ptr(unsafe {
+            sb::C_skottie_Animation_MakeFromData(data.as_ptr() as *const i8, data.len())
+        })
     }
 
     /// Opens the .lottie file at the given path (expressed as a C string).
@@ -174,7 +174,7 @@ impl Animation {
     /// the file requests an external resource. If you want to be able to load external files,
     /// see [Builder].
     pub fn open_cstr<P: AsRef<CStr>>(path: P) -> Option<Self> {
-        Self::from_ptr(unsafe { sb::skottie_Animation::MakeFromFile(path.as_ref().as_ptr()) }.fPtr)
+        Self::from_ptr(unsafe { sb::C_skottie_Animation_MakeFromFile(path.as_ref().as_ptr()) })
     }
 
     /// Opens the .lottie file at the given path. This function must allocate in order to create
@@ -189,6 +189,18 @@ impl Animation {
             .expect("CString::new failed: path contains null bytes");
 
         Self::open_cstr(&path)
+    }
+
+    pub fn duration(&self) -> f64 {
+        self.native().fDuration
+    }
+
+    pub fn fps(&self) -> f64 {
+        self.native().fFPS
+    }
+
+    pub fn size(&self) -> Size {
+        Size::new(self.native().fSize.fWidth, self.native().fSize.fHeight)
     }
 
     /// Render this animation to a canvas, optionally specifying the location on the canvas that
