@@ -119,6 +119,14 @@ bitflags::bitflags! {
 /// loading external assets) see [Builder].
 pub type Animation = RCHandle<sb::skottie_Animation>;
 
+impl NativeDrop for sb::skottie_Animation {
+    fn drop(&mut self) {
+        unsafe {
+            self.destruct();
+        }
+    }
+}
+
 impl NativeRefCounted for sb::skottie_Animation {
     fn _ref(&self) {
         unsafe { sb::C_skottie_Animation_ref(self) }
