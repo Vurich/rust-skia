@@ -80,7 +80,7 @@ impl Builder {
     /// the file requests an external resource. If you want to be able to load external files,
     /// see [Builder].
     pub fn from_data(&mut self, data: &[u8]) -> Option<Animation> {
-        Animation::from_ptr(unsafe { self.make1(data.as_ptr() as *const i8, data.len()) }.fPtr)
+        Animation::from_ptr(unsafe { self.make1(data.as_ptr() as *const _, data.len()) }.fPtr)
     }
 
     /// Opens the .lottie file at the given path (expressed as a C string).
@@ -164,7 +164,7 @@ impl Animation {
     /// see [Builder].
     pub fn from_data(data: &[u8]) -> Option<Self> {
         Self::from_ptr(unsafe {
-            sb::C_skottie_Animation_MakeFromData(data.as_ptr() as *const i8, data.len())
+            sb::C_skottie_Animation_MakeFromData(data.as_ptr() as *const _, data.len())
         })
     }
 
