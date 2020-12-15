@@ -1,3 +1,5 @@
+#![deny(missing_docs)]
+
 use super::{PositionWithAffinity, RectHeightStyle, RectWidthStyle, TextBox};
 use crate::prelude::*;
 use crate::textlayout::LineMetrics;
@@ -5,7 +7,10 @@ use crate::{scalar, Canvas, Point};
 use skia_bindings as sb;
 use std::ops::{Index, Range};
 
+/// A simple multiline text block with homogenous text style. This must be created from a
+/// [ParagraphBuilder].
 pub type Paragraph = RefHandle<sb::skia_textlayout_Paragraph>;
+
 unsafe impl Send for Paragraph {}
 unsafe impl Sync for Paragraph {}
 
@@ -16,47 +21,60 @@ impl NativeDrop for sb::skia_textlayout_Paragraph {
 }
 
 impl Paragraph {
+    /// Get the maximum width of the paragraph.
     pub fn max_width(&self) -> scalar {
         self.native().fWidth
     }
 
+    /// Get the height of the paragraph (calculated from the text, style and width).
     pub fn height(&self) -> scalar {
         self.native().fHeight
     }
 
+    /// > **TODO**: For Flutter
     pub fn min_intrinsic_width(&self) -> scalar {
         self.native().fMinIntrinsicWidth
     }
 
+    /// > **TODO**: For Flutter
     pub fn max_intrinsic_width(&self) -> scalar {
         self.native().fMaxIntrinsicWidth
     }
 
+    /// > **TODO**: For Flutter
     pub fn alphabetic_baseline(&self) -> scalar {
         self.native().fAlphabeticBaseline
     }
 
+    /// > **TODO**: For Flutter
     pub fn ideographic_baseline(&self) -> scalar {
         self.native().fIdeographicBaseline
     }
 
+    /// > **TODO**: For Flutter
     pub fn longest_line(&self) -> scalar {
         self.native().fLongestLine
     }
 
+    /// True if the number of lines needed to layout the text exceeded the supplied maximum lines
+    /// at build-time.
     pub fn did_exceed_max_lines(&self) -> bool {
         self.native().fExceededMaxLines
     }
 
+    /// Reflow the text to the new supplied width.
     pub fn layout(&mut self, width: scalar) {
         unsafe { sb::C_Paragraph_layout(self.native_mut(), width) }
     }
 
+    /// Draw this paragraph to the canvas at the supplied offset.
     pub fn paint(&self, canvas: &mut Canvas, p: impl Into<Point>) {
         let p = p.into();
         unsafe { sb::C_Paragraph_paint(self.native_mut_force(), canvas.native_mut(), p.x, p.y) }
     }
 
+    /// Get the list of bounding boxes representing the area that would be drawn to
+    /// when this paragraph is drawn to the canvas.
     pub fn get_rects_for_range(
         &self,
         range: Range<usize>,
@@ -81,6 +99,10 @@ impl Paragraph {
         })
     }
 
+    /// Returns the glyph at the position. The supplied point is relative to the top-left corner of
+    /// the paragraph, with +y being down.
+    ///
+    /// See [PositionWithAffinity] for more information on the meaning of the returned value.
     pub fn get_glyph_position_at_coordinate(&self, p: impl Into<Point>) -> PositionWithAffinity {
         let p = p.into();
         let mut r = Default::default();
@@ -90,6 +112,8 @@ impl Paragraph {
         r
     }
 
+    /// Returns the glyph range that defines the word boundaries before and after the supplied offset
+    /// in the paragraph.
     pub fn get_word_boundary(&self, offset: u32) -> Range<usize> {
         let mut range: [usize; 2] = Default::default();
         unsafe {
@@ -98,6 +122,8 @@ impl Paragraph {
         range[0]..range[1]
     }
 
+    /// Calculate a vector containing metrics about each line in the paragraph. See [LineMetricsVector] and
+    /// [LineMetrics] for more information.
     pub fn get_line_metrics(&self) -> LineMetricsVector {
         Handle::<sb::LineMetricsVector>::construct(|lmv| unsafe {
             sb::C_Paragraph_getLineMetrics(self.native_mut_force(), lmv)
@@ -105,15 +131,19 @@ impl Paragraph {
         .borrows(self)
     }
 
+    /// Returns the number of lines in the paragraph.
     pub fn line_number(&self) -> usize {
         unsafe { sb::C_Paragraph_lineNumber(self.native_mut_force()) }
     }
 
+    /// Manually mark this paragraph as needing to have internal values recalculated. This should usually
+    /// never need to be called by a consumer of this library.
     pub fn mark_dirty(&self) {
         unsafe { sb::C_Paragraph_markDirty(self.native_mut_force()) }
     }
 }
 
+/// An array of bounding boxes returned by [Paragraph].
 pub type TextBoxes = Handle<sb::TextBoxes>;
 
 impl NativeDrop for sb::TextBoxes {

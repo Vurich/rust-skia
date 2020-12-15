@@ -113,6 +113,7 @@ impl StrutStyle {
 
 // Can't use Handle<> here, std::u16string maintains an interior pointer.
 pub type ParagraphStyle = RefHandle<sb::skia_textlayout_ParagraphStyle>;
+
 unsafe impl Send for ParagraphStyle {}
 unsafe impl Sync for ParagraphStyle {}
 

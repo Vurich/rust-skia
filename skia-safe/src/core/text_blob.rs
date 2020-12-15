@@ -8,6 +8,7 @@ use std::convert::TryInto;
 use std::{ptr, slice};
 
 pub type TextBlob = RCHandle<SkTextBlob>;
+
 unsafe impl Send for TextBlob {}
 unsafe impl Sync for TextBlob {}
 

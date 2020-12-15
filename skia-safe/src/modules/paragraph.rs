@@ -1,3 +1,7 @@
+//! Types and functions related to multiline text layout with homogenous style in Skia. For how to
+//! create a new paragraph for rendering, see [ParagraphBuilder]. If you need heterogenous style
+//! (such as when rendering a rich text document), see [crate::shaper].
+
 use crate::interop::AsStr;
 use std::ops::Index;
 

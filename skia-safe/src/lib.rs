@@ -1,4 +1,3 @@
-#![warn(missing_docs)]
 #![cfg_attr(any(docsrs, feature = "nightly"), feature(doc_cfg))]
 
 pub mod codec;
@@ -13,9 +12,11 @@ pub mod animation;
 mod core;
 mod docs;
 mod effects;
+
 #[cfg(feature = "gpu")]
 #[cfg_attr(any(docsrs, feature = "nightly"), doc(cfg(feature = "gpu")))]
 pub mod gpu;
+
 mod interop;
 mod modules;
 mod pathops;
