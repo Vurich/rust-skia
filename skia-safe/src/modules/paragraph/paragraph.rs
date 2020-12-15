@@ -41,17 +41,30 @@ impl Paragraph {
         self.native().fMaxIntrinsicWidth
     }
 
-    /// > **TODO**: For Flutter
+    /// The baseline as defined to let glyphs for characters such as a, e, o will sit on the baseline,
+    /// while glyphs for characters such as j, y, p, as well as many characters in languages such as
+    /// Chinese, may go below it. The precise set of glyphs which sit on the baseline and which may be
+    /// drawn below the baseline depends on typeface.
+    ///
+    /// This value is for the first line in the paragraph and is specified in px, relative to origin
+    /// of the paragraph.
     pub fn alphabetic_baseline(&self) -> scalar {
         self.native().fAlphabeticBaseline
     }
 
-    /// > **TODO**: For Flutter
+    /// The baseline as defined such that no glyph will be drawn below the baseline. This is below or equal
+    /// to the lowest of any point in the glyphs in the text. The ideographic vs alphabetic baselines do
+    /// not relate to the glyphs' vertical positions relative to one another, only their position relative
+    /// to the baseline.
+    ///
+    /// This value is for the first line in the paragraph and is specified in px, relative to origin
+    /// of the paragraph.
     pub fn ideographic_baseline(&self) -> scalar {
         self.native().fIdeographicBaseline
     }
 
-    /// > **TODO**: For Flutter
+    /// The distance from the left edge of the leftmost glyph to the right edge of the rightmost glyph
+    /// in the paragraph.
     pub fn longest_line(&self) -> scalar {
         self.native().fLongestLine
     }
