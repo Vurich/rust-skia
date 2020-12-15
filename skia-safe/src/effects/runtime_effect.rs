@@ -103,11 +103,15 @@ impl Varying {
 
 /// An effect defined as a shader, written in Skia's custom GLSL-derived shader language "SkSL".
 /// For information on SkSL you can see [Google's repository](https://github.com/google/skia/tree/master/src/sksl),
-/// which has a readme describing the language and how to use it. Additionally, the Skia repository contains some
-/// examples of SkSL code, which can be found in `.fp` files, such as
-/// [here](https://github.com/google/skia/tree/master/src/gpu/gradients).
+/// which has a readme describing the language and how to use it. Additionally, the Skia repository contains a
+/// huge number of examples of SkSL files in its tests, which you can see
+/// [here](https://github.com/google/skia/tree/master/tests/sksl).
 ///
-/// This language is mostly considered by Skia's team to be internal, and so documentation on it is sparse.
+/// This language is mostly considered by Skia's team to be internal, and so documentation on it is sparse, but
+/// with some knowledge of GLSL it's relatively straightforward to learn how to write code using it.
+///
+/// Skia also has the concept of "fragment processors", which are essentially a combination of shader and C++ class,
+/// and which need to be compiled independently. These bindings make no attempt to expose any interface to this.
 pub type RuntimeEffect = RCHandle<SkRuntimeEffect>;
 
 impl NativeRefCountedBase for SkRuntimeEffect {
