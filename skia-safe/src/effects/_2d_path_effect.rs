@@ -1,6 +1,4 @@
-use crate::prelude::*;
 use crate::{scalar, Matrix, Path, PathEffect};
-use skia_bindings::SkPathEffect;
 
 impl PathEffect {
     pub fn line_2d(width: scalar, matrix: &Matrix) -> Option<PathEffect> {

@@ -1,7 +1,6 @@
 use crate::prelude::*;
 use crate::{scalar, ISize, Shader};
 use skia_bindings as sb;
-use skia_bindings::SkShader;
 
 impl Shader {
     pub fn fractal_perlin_noise(

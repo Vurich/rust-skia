@@ -1,7 +1,6 @@
 use crate::prelude::*;
 use crate::{image_filters, FilterQuality, Image, ImageFilter, Rect};
 use skia_bindings as sb;
-use skia_bindings::{SkImage, SkImageFilter};
 
 impl ImageFilter {
     pub fn from_image(image: impl Into<Image>) -> Option<Self> {

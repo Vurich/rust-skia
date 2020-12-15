@@ -143,7 +143,7 @@ impl Paragraph {
     }
 }
 
-/// An array of bounding boxes returned by [Paragraph].
+/// An array of bounding boxes returned by [Paragraph]. See [TextBox] for more information.
 pub type TextBoxes = Handle<sb::TextBoxes>;
 
 impl NativeDrop for sb::TextBoxes {
@@ -166,10 +166,12 @@ impl AsRef<[TextBox]> for TextBoxes {
 }
 
 impl TextBoxes {
+    /// Iterate over the individual bounding boxes in this array.
     pub fn iter(&self) -> impl Iterator<Item = &TextBox> {
         self.as_slice().iter()
     }
 
+    /// Convert to a slice of bounding boxes (this type also implements [AsRef]).
     pub fn as_slice(&self) -> &[TextBox] {
         unsafe {
             let mut count = 0;
@@ -179,6 +181,7 @@ impl TextBoxes {
     }
 }
 
+/// An array of metrics about individual lines in a paragraph. See [LineMetrics] for more information.
 pub type LineMetricsVector<'a> = Borrows<'a, Handle<sb::LineMetricsVector>>;
 
 impl NativeDrop for sb::LineMetricsVector {
@@ -201,10 +204,12 @@ impl<'a> AsRef<[LineMetrics<'a>]> for Borrows<'a, Handle<sb::LineMetricsVector>>
 }
 
 impl<'a> Borrows<'a, Handle<sb::LineMetricsVector>> {
+    /// Iterate over the metrics for each line.
     pub fn iter(&self) -> impl Iterator<Item = &'a LineMetrics<'a>> {
         self.as_slice().iter()
     }
 
+    /// Convert to a slice of line metrics structs (this type also implements [AsRef]).
     pub fn as_slice(&self) -> &'a [LineMetrics<'a>] {
         unsafe {
             let mut count = 0;

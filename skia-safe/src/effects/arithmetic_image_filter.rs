@@ -1,7 +1,6 @@
 use crate::prelude::*;
 use crate::{image_filter, image_filters, IRect, ImageFilter};
 use skia_bindings as sb;
-use skia_bindings::SkImageFilter;
 
 impl ImageFilter {
     #[allow(clippy::too_many_arguments)]

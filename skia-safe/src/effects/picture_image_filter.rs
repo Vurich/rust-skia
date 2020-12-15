@@ -1,7 +1,6 @@
 use crate::prelude::*;
 use crate::{image_filters, ImageFilter, Picture, Rect};
 use skia_bindings as sb;
-use skia_bindings::{SkImageFilter, SkPicture};
 
 impl ImageFilter {
     pub fn from_picture<'a>(

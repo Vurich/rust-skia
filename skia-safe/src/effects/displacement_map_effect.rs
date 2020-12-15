@@ -1,7 +1,6 @@
 use crate::prelude::*;
 use crate::{image_filter::CropRect, image_filters, scalar, ColorChannel, IRect, ImageFilter};
 use skia_bindings as sb;
-use skia_bindings::SkImageFilter;
 
 impl ImageFilter {
     pub fn displacement_map_effect<'a>(

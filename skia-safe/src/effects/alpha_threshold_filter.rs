@@ -1,7 +1,6 @@
 use crate::prelude::*;
 use crate::{image_filter::CropRect, image_filters, scalar, IRect, ImageFilter, Region};
 use skia_bindings as sb;
-use skia_bindings::SkImageFilter;
 
 impl ImageFilter {
     pub fn alpha_threshold<'a>(

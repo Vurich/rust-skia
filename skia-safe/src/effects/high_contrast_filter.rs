@@ -2,7 +2,7 @@ use crate::high_contrast_config::InvertStyle;
 use crate::prelude::*;
 use crate::{scalar, ColorFilter};
 use skia_bindings as sb;
-use skia_bindings::{SkColorFilter, SkHighContrastConfig};
+use skia_bindings::SkHighContrastConfig;
 
 pub mod high_contrast_config {
     pub use skia_bindings::SkHighContrastConfig_InvertStyle as InvertStyle;

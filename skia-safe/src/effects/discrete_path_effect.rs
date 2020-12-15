@@ -1,4 +1,3 @@
-use crate::prelude::*;
 use crate::{scalar, PathEffect};
 use skia_bindings as sb;
 

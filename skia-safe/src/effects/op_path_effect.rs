@@ -2,7 +2,6 @@ pub mod merge_path_effect {
     use crate::prelude::*;
     use crate::{PathEffect, PathOp};
     use skia_bindings as sb;
-    use skia_bindings::SkPathEffect;
 
     impl PathEffect {
         pub fn merge(
@@ -26,7 +25,6 @@ pub mod matrix_path_effect {
     use crate::prelude::*;
     use crate::{Matrix, PathEffect, Vector};
     use skia_bindings as sb;
-    use skia_bindings::SkPathEffect;
 
     impl PathEffect {
         pub fn matrix_translate(d: impl Into<Vector>) -> Option<PathEffect> {
@@ -49,10 +47,9 @@ pub mod matrix_path_effect {
 }
 
 pub mod stroke_path_effect {
-    use crate::prelude::*;
+
     use crate::{paint, scalar, PathEffect};
     use skia_bindings as sb;
-    use skia_bindings::SkPathEffect;
 
     impl PathEffect {
         pub fn stroke(

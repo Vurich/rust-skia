@@ -1,7 +1,6 @@
 use crate::prelude::*;
 use crate::{scalar, Color, Color4f, ColorSpace, DrawLooper, Vector};
 use skia_bindings as sb;
-use skia_bindings::SkDrawLooper;
 
 impl DrawLooper {
     pub fn blur(color: impl Into<Color>, sigma: scalar, delta: impl Into<Vector>) -> Option<Self> {

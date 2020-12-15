@@ -1,7 +1,6 @@
 use crate::prelude::*;
 use crate::{Color, ColorFilter};
 use skia_bindings as sb;
-use skia_bindings::SkColorFilter;
 
 impl ColorFilter {
     pub fn new_lighting(mul: impl Into<Color>, add: impl Into<Color>) -> Option<Self> {

@@ -1,4 +1,3 @@
-use crate::prelude::Handle;
 use crate::{Bitmap, Data, EncodedImageFormat, Pixmap};
 
 impl Pixmap {

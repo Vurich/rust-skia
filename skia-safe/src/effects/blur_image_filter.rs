@@ -1,7 +1,7 @@
 use crate::prelude::*;
 use crate::{image_filter::CropRect, image_filters, scalar, IRect, ImageFilter};
 use skia_bindings as sb;
-use skia_bindings::{SkBlurImageFilter_TileMode, SkImageFilter};
+use skia_bindings::SkBlurImageFilter_TileMode;
 
 impl ImageFilter {
     pub fn blur<'a>(

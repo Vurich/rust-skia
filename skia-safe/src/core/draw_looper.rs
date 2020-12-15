@@ -39,6 +39,7 @@ fn test_blur_shadow_rec_layout() {
     BlurShadowRec::test_layout()
 }
 
+#[allow(deprecated)]
 impl DrawLooper {
     // TODO: Context
     // TODO: makeContext

@@ -3,7 +3,7 @@
 use crate::prelude::*;
 use crate::{Path, Rect};
 use skia_bindings as sb;
-use skia_bindings::{SkOpBuilder, SkPath};
+use skia_bindings::SkOpBuilder;
 
 pub use skia_bindings::SkPathOp as PathOp;
 #[test]

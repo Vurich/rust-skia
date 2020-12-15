@@ -1,7 +1,6 @@
 use crate::prelude::*;
 use crate::{image_filter::CropRect, image_filters, IRect, ImageFilter, Paint};
 use skia_bindings as sb;
-use skia_bindings::{SkImageFilter, SkPaint};
 
 impl ImageFilter {
     pub fn from_paint<'a>(paint: &Paint, crop_rect: impl Into<Option<&'a IRect>>) -> Option<Self> {

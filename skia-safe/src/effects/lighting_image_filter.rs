@@ -1,7 +1,6 @@
 use crate::prelude::*;
 use crate::{image_filter::CropRect, image_filters, scalar, Color, IRect, ImageFilter, Point3};
 use skia_bindings as sb;
-use skia_bindings::SkImageFilter;
 
 impl ImageFilter {
     pub fn distant_lit_diffuse_lighting<'a>(

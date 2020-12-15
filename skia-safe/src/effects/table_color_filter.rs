@@ -1,7 +1,6 @@
 use crate::prelude::*;
 use crate::ColorFilter;
 use skia_bindings as sb;
-use skia_bindings::SkColorFilter;
 
 impl ColorFilter {
     pub fn from_table(table: &[u8; 256]) -> Self {

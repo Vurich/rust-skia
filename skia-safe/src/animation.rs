@@ -4,7 +4,7 @@
 //! any image into the scene.
 
 use std::{
-    ffi::{CStr, CString, OsStr},
+    ffi::{CStr, CString},
     ops::{Deref, DerefMut},
     path::Path,
 };

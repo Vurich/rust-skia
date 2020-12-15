@@ -1,7 +1,6 @@
 use crate::prelude::*;
 use crate::{scalar, Color, Color4f, ColorSpace, Matrix, Point, Shader, TileMode};
 use skia_bindings as sb;
-use skia_bindings::SkShader;
 
 impl Shader {
     pub fn linear_gradient<'a>(
