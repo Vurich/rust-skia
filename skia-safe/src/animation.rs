@@ -1,3 +1,8 @@
+#![deny(missing_docs)]
+
+//! 2D vector animations using the [Lottie](https://lottiefiles.com/) file format. These can be rendered like
+//! any image into the scene.
+
 use std::{
     ffi::{CStr, CString, OsStr},
     ops::{Deref, DerefMut},
@@ -108,9 +113,18 @@ impl Builder {
 }
 
 bitflags::bitflags! {
+    /// Flags related to rendering an animation (distinct from flags related to loading an animation, see
+    /// [BuilderFlags]).
     #[derive(Default)]
     pub struct RenderFlags: u32 {
+        /// For animations with non-trivial blending that cannot be directly composited into the scene,
+        /// they are usually automatically composited into a separate layer, which is then composited
+        /// into the scene separately. Enabling this flag causes the animation to always be directly
+        /// composited into the scene. This is faster, but can lead to incorrect results.
         const SKIP_TOP_LEVEL_ISOLATION = sb::skottie_Animation_RenderFlag::kSkipTopLevelIsolation as _;
+        /// By default, the animation is automatically clipped to its bounds as specified in the file.
+        /// Enabling this flag will prevent the animation from being clipped at all, which allows it to
+        /// draw outside its specified bounds.
         const DISABLE_TOP_LEVEL_CLIPPING = sb::skottie_Animation_RenderFlag::kDisableTopLevelClipping as _;
     }
 }
@@ -177,6 +191,8 @@ impl DirtyRegion {
     }
 }
 
+/// > **Note**: This is internal, and is only documented for the sake of completeness.
+///
 /// A possible result for `Animation::seek_frame` and `Animation::seek_time`. These functions
 /// can optionally mark regions that would be made dirty, but instead of an optional, mutable
 /// argument we instead use generic return types to capture this.
@@ -186,6 +202,10 @@ impl DirtyRegion {
 /// definition of exactly what that means is left undefined for now, and this trait can be considered
 /// internal.
 pub unsafe trait SeekResult: Default {
+    /// > **Note**: This is internal, and is only documented for the sake of completeness.
+    ///
+    /// Turn this value into a pointer that can be used in `seek_frame` or `seek_time`. See
+    /// trait documentation.
     fn as_invalidation_controller_ptr_mut(&mut self) -> *mut sb::sksg_InvalidationController;
 }
 
