@@ -11,22 +11,10 @@ use skia_bindings::{SkRefCntBase, SkSurface};
 use std::ptr;
 
 pub use skia_bindings::SkSurface_ContentChangeMode as ContentChangeMode;
-#[test]
-fn test_surface_content_change_mode_naming() {
-    let _ = ContentChangeMode::Retain;
-}
 
 pub use skia_bindings::SkSurface_BackendHandleAccess as BackendHandleAccess;
-#[test]
-fn test_surface_backend_handle_access_naming() {
-    let _ = BackendHandleAccess::FlushWrite;
-}
 
 pub use skia_bindings::SkSurface_BackendSurfaceAccess as BackendSurfaceAccess;
-#[test]
-fn test_surface_backend_surface_access_naming() {
-    let _ = BackendSurfaceAccess::Present;
-}
 
 pub type Surface = RCHandle<SkSurface>;
 
@@ -550,52 +538,75 @@ impl Surface {
     }
 }
 
-#[test]
-fn create() {
-    assert!(Surface::new_raster_n32_premul((0, 0)).is_none());
-    let surface = Surface::new_raster_n32_premul((1, 1)).unwrap();
-    assert_eq!(1, surface.native().ref_counted_base()._ref_cnt())
-}
+#[cfg(test)]
+mod tests {
+    use super::{
+        BackendHandleAccess, BackendSurfaceAccess, Canvas, ContentChangeMode, ISize, ImageInfo,
+        NativeAccess, NativeRefCounted, NativeRefCountedBase, Paint, Surface,
+    };
 
-#[test]
-fn test_raster_direct() {
-    let image_info = ImageInfo::new(
-        (20, 20),
-        crate::ColorType::RGBA8888,
-        crate::AlphaType::Unpremul,
-        None,
-    );
-    let min_row_bytes = image_info.min_row_bytes();
-    let mut pixels = vec![0u8; image_info.compute_byte_size(min_row_bytes)];
-    let mut surface = Surface::new_raster_direct(
-        &image_info,
-        pixels.as_mut_slice(),
-        Some(min_row_bytes),
-        None,
-    )
-    .unwrap();
-    let paint = Paint::default();
-    surface.canvas().draw_circle((10, 10), 10.0, &paint);
-}
-
-#[test]
-fn test_drawing_owned_as_exclusive_ref_ergonomics() {
-    let mut surface = Surface::new_raster_n32_premul((16, 16)).unwrap();
-
-    // option1:
-    // - An &mut canvas can be drawn to.
-    {
-        let mut canvas = Canvas::new(ISize::new(16, 16), None).unwrap();
-        surface.draw(&mut canvas, (5.0, 5.0), None);
-        surface.draw(&mut canvas, (10.0, 10.0), None);
+    #[test]
+    fn test_surface_content_change_mode_naming() {
+        let _ = ContentChangeMode::Retain;
     }
 
-    // option2:
-    // - A canvas from another surface can be drawn to.
-    {
-        let mut surface2 = Surface::new_raster_n32_premul((16, 16)).unwrap();
-        let canvas = surface2.canvas();
-        surface.draw(canvas, (5.0, 5.0), None);
-        surface.draw(canvas, (10.0, 10.0), None);
+    #[test]
+    fn test_surface_backend_handle_access_naming() {
+        let _ = BackendHandleAccess::FlushWrite;
+    }
+
+    #[test]
+    fn test_surface_backend_surface_access_naming() {
+        let _ = BackendSurfaceAccess::Present;
+    }
+
+    #[test]
+    fn create() {
+        assert!(Surface::new_raster_n32_premul((0, 0)).is_none());
+        let surface = Surface::new_raster_n32_premul((1, 1)).unwrap();
+        assert_eq!(1, surface.native().ref_counted_base()._ref_cnt())
+    }
+
+    #[test]
+    fn test_raster_direct() {
+        let image_info = ImageInfo::new(
+            (20, 20),
+            crate::ColorType::RGBA8888,
+            crate::AlphaType::Unpremul,
+            None,
+        );
+        let min_row_bytes = image_info.min_row_bytes();
+        let mut pixels = vec![0u8; image_info.compute_byte_size(min_row_bytes)];
+        let mut surface = Surface::new_raster_direct(
+            &image_info,
+            pixels.as_mut_slice(),
+            Some(min_row_bytes),
+            None,
+        )
+        .unwrap();
+        let paint = Paint::default();
+        surface.canvas().draw_circle((10, 10), 10.0, &paint);
+    }
+
+    #[test]
+    fn test_drawing_owned_as_exclusive_ref_ergonomics() {
+        let mut surface = Surface::new_raster_n32_premul((16, 16)).unwrap();
+
+        // option1:
+        // - An &mut canvas can be drawn to.
+        {
+            let mut canvas = Canvas::new(ISize::new(16, 16), None).unwrap();
+            surface.draw(&mut canvas, (5.0, 5.0), None);
+            surface.draw(&mut canvas, (10.0, 10.0), None);
+        }
+
+        // option2:
+        // - A canvas from another surface can be drawn to.
+        {
+            let mut surface2 = Surface::new_raster_n32_premul((16, 16)).unwrap();
+            let canvas = surface2.canvas();
+            surface.draw(canvas, (5.0, 5.0), None);
+            surface.draw(canvas, (10.0, 10.0), None);
+        }
     }
 }
