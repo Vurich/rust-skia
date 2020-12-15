@@ -1,4 +1,5 @@
 #[cfg(feature = "gpu")]
+#[cfg_attr(any(docsrs, feature = "nightly"), doc(cfg(feature = "gpu")))]
 use crate::gpu;
 use crate::prelude::*;
 use crate::{
@@ -10,42 +11,14 @@ use skia_bindings as sb;
 use skia_bindings::{SkImage, SkRefCntBase};
 use std::{mem, ptr};
 
-pub use skia_bindings::SkMipmapMode as MipmapMode;
-#[test]
-fn test_mipmap_mode_naming() {
-    let _ = MipmapMode::Nearest;
-}
+pub use skia_bindings::{
+    SkImage_BitDepth as BitDepth, SkImage_CachingHint as CachingHint,
+    SkImage_CompressionType as CompressionType, SkImage_CubicResampler as CubicResampler,
+    SkMipmapMode as MipmapMode,
+};
 
 // TODO: Add MipmapBuilder as soon it's documented or
 //       SkMipmap made its way into the public interface.
-
-pub use skia_bindings::SkImage_BitDepth as BitDepth;
-#[test]
-fn test_bit_depth_naming() {
-    let _ = BitDepth::F16;
-}
-
-pub use skia_bindings::SkImage_CubicResampler as CubicResampler;
-#[test]
-fn test_cubic_resampler_naming() {
-    let _ = CubicResampler { B: 0.0, C: 0.0 };
-}
-
-pub use skia_bindings::SkImage_CachingHint as CachingHint;
-#[test]
-fn test_caching_hint_naming() {
-    let _ = CachingHint::Allow;
-}
-
-pub use skia_bindings::SkImage_CompressionType as CompressionType;
-#[test]
-fn test_compression_type_naming() {
-    // legacy type (replaced in m81 by ETC2_RGB8_UNORM)
-    #[allow(deprecated)]
-    let _ = CompressionType::ETC1;
-    // m81: preserve the underscore characters for consistency.
-    let _ = CompressionType::BC1_RGBA8_UNORM;
-}
 
 pub type Image = RCHandle<SkImage>;
 unsafe impl Send for Image {}
@@ -94,6 +67,7 @@ impl Image {
     }
 
     #[cfg(feature = "gpu")]
+    #[cfg_attr(any(docsrs, feature = "nightly"), doc(cfg(feature = "gpu")))]
     #[deprecated(since = "0.35.0", note = "Removed without replacement")]
     pub fn decode_to_texture(
         _context: &mut gpu::Context,
@@ -104,6 +78,7 @@ impl Image {
     }
 
     #[cfg(feature = "gpu")]
+    #[cfg_attr(any(docsrs, feature = "nightly"), doc(cfg(feature = "gpu")))]
     pub fn new_texture_from_compressed(
         context: &mut gpu::DirectContext,
         data: Data,
@@ -131,6 +106,7 @@ impl Image {
 
     #[deprecated(since = "0.35.0", note = "Removed without replacement")]
     #[cfg(feature = "gpu")]
+    #[cfg_attr(any(docsrs, feature = "nightly"), doc(cfg(feature = "gpu")))]
     pub fn from_compressed(
         _context: &mut gpu::RecordingContext,
         _data: Data,
@@ -157,6 +133,7 @@ impl Image {
     }
 
     #[cfg(feature = "gpu")]
+    #[cfg_attr(any(docsrs, feature = "nightly"), doc(cfg(feature = "gpu")))]
     // TODO: add variant with TextureReleaseProc
     pub fn from_texture(
         context: &mut gpu::RecordingContext,
@@ -182,6 +159,7 @@ impl Image {
 
     #[deprecated(since = "0.27.0", note = "renamed, use new_cross_context_from_pixmap")]
     #[cfg(feature = "gpu")]
+    #[cfg_attr(any(docsrs, feature = "nightly"), doc(cfg(feature = "gpu")))]
     pub fn from_pixmap_cross_context(
         context: &mut gpu::DirectContext,
         pixmap: &Pixmap,
@@ -192,6 +170,7 @@ impl Image {
     }
 
     #[cfg(feature = "gpu")]
+    #[cfg_attr(any(docsrs, feature = "nightly"), doc(cfg(feature = "gpu")))]
     pub fn new_cross_context_from_pixmap(
         context: &mut gpu::DirectContext,
         pixmap: &Pixmap,
@@ -209,6 +188,7 @@ impl Image {
     }
 
     #[cfg(feature = "gpu")]
+    #[cfg_attr(any(docsrs, feature = "nightly"), doc(cfg(feature = "gpu")))]
     pub fn from_adopted_texture(
         context: &mut gpu::RecordingContext,
         backend_texture: &gpu::BackendTexture,
@@ -230,6 +210,7 @@ impl Image {
     }
 
     #[cfg(feature = "gpu")]
+    #[cfg_attr(any(docsrs, feature = "nightly"), doc(cfg(feature = "gpu")))]
     pub fn from_yuva_textures(
         context: &mut gpu::Context,
         yuv_color_space: crate::YUVColorSpace,
@@ -393,11 +374,13 @@ impl Image {
     }
 
     #[cfg(feature = "gpu")]
+    #[cfg_attr(any(docsrs, feature = "nightly"), doc(cfg(feature = "gpu")))]
     pub fn is_valid(&self, context: &mut gpu::RecordingContext) -> bool {
         unsafe { self.native().isValid(context.native_mut()) }
     }
 
     #[cfg(feature = "gpu")]
+    #[cfg_attr(any(docsrs, feature = "nightly"), doc(cfg(feature = "gpu")))]
     pub fn flush_with_info(
         &mut self,
         context: &mut gpu::DirectContext,
@@ -412,6 +395,7 @@ impl Image {
     // TODO: m86: implement new flush() variant that is based on flush_with_info() as soon the old
     // flush() is removed.
     #[cfg(feature = "gpu")]
+    #[cfg_attr(any(docsrs, feature = "nightly"), doc(cfg(feature = "gpu")))]
     #[deprecated(
         since = "0.33.0",
         note = "use flushAndSubmit() or flush_with_info(,&gpu::FlushInfo::default())"
@@ -421,11 +405,13 @@ impl Image {
     }
 
     #[cfg(feature = "gpu")]
+    #[cfg_attr(any(docsrs, feature = "nightly"), doc(cfg(feature = "gpu")))]
     pub fn flush_and_submit(&mut self, context: &mut gpu::DirectContext) {
         unsafe { self.native_mut().flushAndSubmit(context.native_mut()) }
     }
 
     #[cfg(feature = "gpu")]
+    #[cfg_attr(any(docsrs, feature = "nightly"), doc(cfg(feature = "gpu")))]
     pub fn backend_texture(
         &self,
         flush_pending_gr_context_io: bool,
@@ -445,6 +431,7 @@ impl Image {
     }
 
     #[cfg(feature = "gpu")]
+    #[cfg_attr(any(docsrs, feature = "nightly"), doc(cfg(feature = "gpu")))]
     pub fn read_pixels_with_context<'a, P>(
         &self,
         context: impl Into<Option<&'a mut gpu::DirectContext>>,
@@ -476,6 +463,7 @@ impl Image {
     }
 
     #[cfg(feature = "gpu")]
+    #[cfg_attr(any(docsrs, feature = "nightly"), doc(cfg(feature = "gpu")))]
     pub fn read_pixels_to_pixmap_with_context<'a>(
         &self,
         context: impl Into<Option<&'a mut gpu::DirectContext>>,
@@ -527,6 +515,7 @@ impl Image {
     }
 
     #[cfg(feature = "gpu")]
+    #[cfg_attr(any(docsrs, feature = "nightly"), doc(cfg(feature = "gpu")))]
     pub unsafe fn read_pixels_to_pixmap(
         &self,
         dst: &Pixmap,
@@ -583,6 +572,7 @@ impl Image {
     }
 
     #[cfg(feature = "gpu")]
+    #[cfg_attr(any(docsrs, feature = "nightly"), doc(cfg(feature = "gpu")))]
     pub fn new_subset_with_context<'a>(
         &self,
         rect: impl AsRef<IRect>,
@@ -606,6 +596,7 @@ impl Image {
     }
 
     #[cfg(feature = "gpu")]
+    #[cfg_attr(any(docsrs, feature = "nightly"), doc(cfg(feature = "gpu")))]
     pub fn new_texture_image(
         &self,
         context: &mut gpu::DirectContext,
@@ -615,6 +606,7 @@ impl Image {
     }
 
     #[cfg(feature = "gpu")]
+    #[cfg_attr(any(docsrs, feature = "nightly"), doc(cfg(feature = "gpu")))]
     pub fn new_texture_image_budgeted(
         &self,
         context: &mut gpu::DirectContext,
@@ -647,6 +639,7 @@ impl Image {
 
     // TODO: rename to with_filter()?
     #[cfg(feature = "gpu")]
+    #[cfg_attr(any(docsrs, feature = "nightly"), doc(cfg(feature = "gpu")))]
     pub fn new_with_filter(
         &self,
         mut context: Option<&mut gpu::RecordingContext>,
@@ -712,6 +705,7 @@ impl Image {
     }
 
     #[cfg(feature = "gpu")]
+    #[cfg_attr(any(docsrs, feature = "nightly"), doc(cfg(feature = "gpu")))]
     pub fn new_color_space_with_context<'a>(
         &self,
         color_space: impl Into<Option<ColorSpace>>,
@@ -730,5 +724,39 @@ impl Image {
         Image::from_ptr(unsafe {
             sb::C_SkImage_reinterpretColorSpace(self.native(), new_color_space.into().into_ptr())
         })
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{BitDepth, CachingHint, CompressionType, CubicResampler, MipmapMode};
+
+    #[test]
+    fn test_mipmap_mode_naming() {
+        let _ = MipmapMode::Nearest;
+    }
+
+    #[test]
+    fn test_bit_depth_naming() {
+        let _ = BitDepth::F16;
+    }
+
+    #[test]
+    fn test_cubic_resampler_naming() {
+        let _ = CubicResampler { B: 0.0, C: 0.0 };
+    }
+
+    #[test]
+    fn test_caching_hint_naming() {
+        let _ = CachingHint::Allow;
+    }
+
+    #[test]
+    fn test_compression_type_naming() {
+        // legacy type (replaced in m81 by ETC2_RGB8_UNORM)
+        #[allow(deprecated)]
+        let _ = CompressionType::ETC1;
+        // m81: preserve the underscore characters for consistency.
+        let _ = CompressionType::BC1_RGBA8_UNORM;
     }
 }

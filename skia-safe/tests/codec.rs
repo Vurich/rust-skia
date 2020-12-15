@@ -116,6 +116,7 @@ fn test_encoder_enum() {
         EncodedImageFormat::ASTC => {}
         EncodedImageFormat::DNG => {}
         EncodedImageFormat::HEIF => {}
+        EncodedImageFormat::AVIF => {}
     }
 }
 

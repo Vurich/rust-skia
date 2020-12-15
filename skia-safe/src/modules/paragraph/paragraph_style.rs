@@ -28,13 +28,13 @@ impl NativePartialEq for sb::skia_textlayout_StrutStyle {
     }
 }
 
-impl Default for Handle<sb::skia_textlayout_StrutStyle> {
+impl Default for StrutStyle {
     fn default() -> Self {
         Self::new()
     }
 }
 
-impl Handle<sb::skia_textlayout_StrutStyle> {
+impl StrutStyle {
     pub fn new() -> Self {
         StrutStyle::construct(|ss| unsafe { sb::C_StrutStyle_Construct(ss) })
     }
@@ -140,7 +140,7 @@ impl Default for RefHandle<sb::skia_textlayout_ParagraphStyle> {
     }
 }
 
-impl RefHandle<sb::skia_textlayout_ParagraphStyle> {
+impl ParagraphStyle {
     pub fn new() -> Self {
         Self::from_ptr(unsafe { sb::C_ParagraphStyle_New() }).unwrap()
     }

@@ -11,7 +11,7 @@ impl NativeRefCountedBase for GrGLInterface {
     type Base = SkRefCntBase;
 }
 
-impl RCHandle<GrGLInterface> {
+impl Interface {
     pub fn new_native() -> Option<Interface> {
         Self::from_ptr(unsafe { sb::C_GrGLInterface_MakeNativeInterface() as _ })
     }
@@ -39,7 +39,7 @@ where
     (*(ctx as *mut F))(std::ffi::CStr::from_ptr(name).to_str().unwrap())
 }
 
-impl RCHandle<GrGLInterface> {
+impl Interface {
     pub fn validate(&self) -> bool {
         unsafe { self.native().validate() }
     }

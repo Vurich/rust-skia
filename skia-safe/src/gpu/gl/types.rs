@@ -51,6 +51,9 @@ fn test_all_formats_exhaustive() {
         Format::RGBA16 => {}
         Format::RG16F => {}
         Format::LUMINANCE16F => {}
+        Format::STENCIL_INDEX8 => {}
+        Format::STENCIL_INDEX16 => {}
+        Format::DEPTH24_STENCIL8 => {}
     }
 }
 

@@ -1,4 +1,5 @@
 #[cfg(feature = "vulkan")]
+#[cfg_attr(any(docsrs, feature = "nightly"), doc(cfg(feature = "vulkan")))]
 use crate::gpu::vk;
 use crate::gpu::BackendAPI;
 use crate::prelude::*;
@@ -15,12 +16,13 @@ impl NativeDrop for GrBackendDrawableInfo {
     }
 }
 
-impl Handle<GrBackendDrawableInfo> {
+impl BackendDrawableInfo {
     pub fn new() -> BackendDrawableInfo {
         Self::construct(|di| unsafe { sb::C_GrBackendDrawableInfo_Construct(di) })
     }
 
     #[cfg(feature = "vulkan")]
+    #[cfg_attr(any(docsrs, feature = "nightly"), doc(cfg(feature = "vulkan")))]
     pub fn from_vk(info: &vk::DrawableInfo) -> BackendDrawableInfo {
         Self::construct(|di| unsafe { sb::C_GrBackendDrawableInfo_Construct2(di, info.native()) })
     }
@@ -34,6 +36,7 @@ impl Handle<GrBackendDrawableInfo> {
     }
 
     #[cfg(feature = "vulkan")]
+    #[cfg_attr(any(docsrs, feature = "nightly"), doc(cfg(feature = "vulkan")))]
     pub fn get_vk_drawable_info(&self) -> Option<vk::DrawableInfo> {
         unsafe {
             let mut di = vk::DrawableInfo::default();

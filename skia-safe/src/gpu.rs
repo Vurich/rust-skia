@@ -14,6 +14,7 @@ mod context;
 pub use self::context::*;
 
 #[cfg(feature = "d3d")]
+#[cfg_attr(any(docsrs, feature = "nightly"), doc(cfg(feature = "d3d")))]
 pub mod d3d;
 
 mod direct_context;
@@ -23,9 +24,11 @@ mod driver_bug_workarounds;
 pub use self::driver_bug_workarounds::DriverBugWorkarounds;
 
 #[cfg(feature = "gl")]
+#[cfg_attr(any(docsrs, feature = "nightly"), doc(cfg(feature = "gl")))]
 pub mod gl;
 
 #[cfg(feature = "metal")]
+#[cfg_attr(any(docsrs, feature = "nightly"), doc(cfg(feature = "metal")))]
 pub mod mtl;
 
 mod recording_context;
@@ -35,23 +38,5 @@ mod types;
 pub use self::types::*;
 
 #[cfg(feature = "vulkan")]
+#[cfg_attr(any(docsrs, feature = "nightly"), doc(cfg(feature = "vulkan")))]
 pub mod vk;
-
-#[test]
-fn implicit_deref_conversion_from_direct_context_to_context_to_recording_context() {
-    fn _recording_context(_context: &RecordingContext) {}
-    fn _context(context: &Context) {
-        _recording_context(context)
-    }
-    fn _direct_context(context: &DirectContext) {
-        _context(context)
-    }
-
-    fn _recording_context_mut(_context: &mut RecordingContext) {}
-    fn _context_mut(context: &mut Context) {
-        _recording_context_mut(context)
-    }
-    fn _direct_context_mut(context: &mut DirectContext) {
-        _context_mut(context)
-    }
-}

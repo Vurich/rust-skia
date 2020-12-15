@@ -117,6 +117,19 @@ bitflags::bitflags! {
 
 /// A [Lottie](https://lottiefiles.com/) animation. If you need more advanced loading (such as automatically
 /// loading external assets) see [Builder].
+///
+/// ```rust,ignore
+/// let mut anim = Animation::open("data/my-animation.json");
+///
+/// let time = anim.duration() / 2.;
+///
+/// anim.seek_time::<()>(time);
+///
+/// {
+///     let canvas = surface.canvas();
+///     anim.draw(canvas, None);
+/// }
+/// ```
 pub type Animation = RCHandle<sb::skottie_Animation>;
 
 impl NativeDrop for sb::skottie_Animation {
@@ -245,7 +258,9 @@ impl Animation {
             sb::skottie_Animation::render(
                 self.native() as &_,
                 canvas.native_mut(),
-                dst.as_ref().map(|r| r.native() as *const _).unwrap_or(std::ptr::null()),
+                dst.as_ref()
+                    .map(|r| r.native() as *const _)
+                    .unwrap_or(std::ptr::null()),
             )
         }
     }
@@ -265,7 +280,9 @@ impl Animation {
             sb::skottie_Animation::render1(
                 self.native() as &_,
                 canvas.native_mut(),
-                dst.as_ref().map(|r| r.native() as *const _).unwrap_or(std::ptr::null()),
+                dst.as_ref()
+                    .map(|r| r.native() as *const _)
+                    .unwrap_or(std::ptr::null()),
                 flags.bits(),
             )
         }
@@ -276,11 +293,32 @@ impl Animation {
     ///
     /// This function can optionally return a [DirtyRegion], see that type's documentation for what this
     /// means. If in doubt, keep with the default return type of `()`.
+    ///
+    /// ### Discard the dirty region
+    ///
+    /// ```rust,no_run
+    /// # use skia_safe::animation::Animation;
+    ///
+    /// let mut anim = Animation::open("data/my-animation.json").unwrap();
+    ///
+    /// anim.seek_frame::<()>(0.);
+    /// ```
+    ///
+    /// ### Calculate the dirty region
+    ///
+    /// ```rust,no_run
+    /// # use skia_safe::animation::{Animation, DirtyRegion};
+    ///
+    /// let mut anim = Animation::open("data/my-animation.json").unwrap();
+    ///
+    /// let region = anim.seek_frame::<DirtyRegion>(0.);
+    /// ```
     pub fn seek_frame<O: SeekResult>(&mut self, frame: f64) -> O {
         let mut out = O::default();
 
         unsafe {
-            self.native_mut().seekFrame(frame, out.as_invalidation_controller_ptr_mut());
+            self.native_mut()
+                .seekFrame(frame, out.as_invalidation_controller_ptr_mut());
         }
 
         out
@@ -290,11 +328,32 @@ impl Animation {
     ///
     /// This function can optionally return a [DirtyRegion], see that type's documentation for what this
     /// means. If in doubt, keep with the default return type of `()`.
+    ///
+    /// ### Discard the dirty region
+    ///
+    /// ```rust,no_run
+    /// # use skia_safe::animation::Animation;
+    ///
+    /// let mut anim = Animation::open("data/my-animation.json").unwrap();
+    ///
+    /// anim.seek_time::<()>(0.);
+    /// ```
+    ///
+    /// ### Calculate the dirty region
+    ///
+    /// ```rust,no_run
+    /// # use skia_safe::animation::{Animation, DirtyRegion};
+    ///
+    /// let mut anim = Animation::open("data/my-animation.json").unwrap();
+    ///
+    /// let region = anim.seek_time::<DirtyRegion>(0.);
+    /// ```
     pub fn seek_time<O: SeekResult>(&mut self, time: f64) -> O {
         let mut out = O::default();
 
         unsafe {
-            self.native_mut().seekFrameTime(time, out.as_invalidation_controller_ptr_mut());
+            self.native_mut()
+                .seekFrameTime(time, out.as_invalidation_controller_ptr_mut());
         }
 
         out

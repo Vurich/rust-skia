@@ -51,7 +51,7 @@ fn main() {
 
     gl::load_with(|s| windowed_context.get_proc_address(&s));
 
-    let mut gr_context = skia_safe::gpu::Context::new_gl(None).unwrap();
+    let mut gr_context = skia_safe::gpu::Context::new_gl(None, None).unwrap();
 
     let fb_info = {
         let mut fboid: GLint = 0;

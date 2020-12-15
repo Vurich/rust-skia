@@ -29,12 +29,12 @@ mod core {
         font_parameters, image::CubicResampler, image_filter, path, path_effect, region, typeface,
         vertices, Bitmap, Canvas, Color, ColorFilter, ColorInfo, ColorSpace, ContourMeasure,
         ContourMeasureIter, CubicMap, Data, DataTable, DeferredDisplayList,
-        DeferredDisplayListRecorder, Document, Drawable, FilterOptions, Font, FontArguments,
-        FontMetrics, FontMgr, FontStyle, FontStyleSet, Image, ImageFilter, ImageGenerator,
-        ImageInfo, MaskFilter, Matrix, OwnedCanvas, Paint, Path, PathBuilder, PathEffect,
-        PathMeasure, Picture, PictureRecorder, PixelRef, Pixmap, RRect, RSXform, Region, Shader,
-        Surface, SurfaceCharacterization, SurfaceProps, TextBlob, TextBlobBuilder, TextBlobIter,
-        TextBlobRun, Typeface, Vertices, YUVAIndex, YUVASizeInfo, M44,
+        DeferredDisplayListRecorder, Document, Drawable, Font, FontArguments, FontMetrics, FontMgr,
+        FontStyle, FontStyleSet, Image, ImageFilter, ImageGenerator, ImageInfo, MaskFilter, Matrix,
+        OwnedCanvas, Paint, Path, PathBuilder, PathEffect, PathMeasure, Picture, PictureRecorder,
+        PixelRef, Pixmap, RRect, RSXform, Region, Shader, Surface, SurfaceCharacterization,
+        SurfaceProps, TextBlob, TextBlobBuilder, TextBlobIter, TextBlobRun, Typeface, Vertices,
+        YUVAIndex, YUVASizeInfo, M44,
     };
     use static_assertions::*;
 
@@ -56,7 +56,6 @@ mod core {
     assert_not_impl_any!(DeferredDisplayListRecorder: Send, Sync);
     assert_not_impl_any!(Document: Send, Sync);
     assert_not_impl_any!(Drawable: Send, Sync);
-    assert_impl_all!(FilterOptions: Send, Sync);
     assert_impl_all!(Font: Send, Sync);
     assert_not_impl_any!(FontArguments: Send, Sync);
     assert_impl_all!(FontMetrics: Send, Sync);

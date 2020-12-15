@@ -13,7 +13,7 @@ impl NativeDrop for sb::skia_textlayout_ParagraphBuilder {
     }
 }
 
-impl RefHandle<sb::skia_textlayout_ParagraphBuilder> {
+impl ParagraphBuilder {
     pub fn push_style(&mut self, style: &TextStyle) -> &mut Self {
         unsafe { sb::C_ParagraphBuilder_pushStyle(self.native_mut(), style.native()) }
         self

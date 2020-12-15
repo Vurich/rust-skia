@@ -12,11 +12,6 @@ pub struct CropRect(SkImageFilter_CropRect);
 
 impl NativeTransmutable<SkImageFilter_CropRect> for CropRect {}
 
-#[test]
-fn test_crop_rect_layout() {
-    CropRect::test_layout();
-}
-
 impl Default for CropRect {
     fn default() -> Self {
         CropRect::from_native_c(SkImageFilter_CropRect {
@@ -24,11 +19,6 @@ impl Default for CropRect {
             fFlags: 0,
         })
     }
-}
-
-#[test]
-fn test_crop_rect_default() {
-    let _ = CropRect::default();
 }
 
 impl CropRect {
@@ -81,10 +71,6 @@ pub mod crop_rect {
 }
 
 pub use skia_bindings::SkImageFilter_MapDirection as MapDirection;
-#[test]
-fn test_map_direction_naming() {
-    let _ = MapDirection::Forward;
-}
 
 pub type ImageFilter = RCHandle<SkImageFilter>;
 unsafe impl Send for ImageFilter {}
@@ -192,5 +178,23 @@ impl ImageFilter {
             sb::C_SkImageFilter_MakeMatrixFilter(matrix.native(), quality, self.into_ptr())
         })
         .unwrap()
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{CropRect, MapDirection, NativeTransmutable};
+
+    #[test]
+    fn test_crop_rect_layout() {
+        CropRect::test_layout();
+    }
+    #[test]
+    fn test_crop_rect_default() {
+        let _ = CropRect::default();
+    }
+    #[test]
+    fn test_map_direction_naming() {
+        let _ = MapDirection::Forward;
     }
 }

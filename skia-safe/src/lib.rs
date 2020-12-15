@@ -1,4 +1,5 @@
 #![warn(missing_docs)]
+#![cfg_attr(any(docsrs, feature = "nightly"), feature(doc_cfg))]
 
 pub mod codec;
 #[deprecated(since = "0.33.1", note = "use codec::Result")]
@@ -6,11 +7,14 @@ pub use codec::Result as CodecResult;
 pub use codec::{Codec, EncodedOrigin};
 
 #[cfg(feature = "lottie")]
+#[cfg_attr(any(docsrs, feature = "nightly"), doc(cfg(feature = "lottie")))]
 pub mod animation;
+
 mod core;
 mod docs;
 mod effects;
 #[cfg(feature = "gpu")]
+#[cfg_attr(any(docsrs, feature = "nightly"), doc(cfg(feature = "gpu")))]
 pub mod gpu;
 mod interop;
 mod modules;

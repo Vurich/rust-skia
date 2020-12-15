@@ -93,7 +93,7 @@ impl PartialEq for Handle<sb::skia_textlayout_FontFeature> {
     }
 }
 
-impl Handle<sb::skia_textlayout_FontFeature> {
+impl FontFeature {
     pub fn name(&self) -> &str {
         self.native().fName.as_str()
     }
@@ -170,7 +170,7 @@ impl Default for Handle<sb::skia_textlayout_TextStyle> {
     }
 }
 
-impl Handle<sb::skia_textlayout_TextStyle> {
+impl TextStyle {
     pub fn new() -> Self {
         TextStyle::construct(|ts| unsafe { sb::C_TextStyle_Construct(ts) })
     }

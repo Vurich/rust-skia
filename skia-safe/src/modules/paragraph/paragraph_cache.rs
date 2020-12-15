@@ -10,7 +10,7 @@ impl NativeDrop for skia_textlayout_ParagraphCache {
     }
 }
 
-impl Handle<skia_textlayout_ParagraphCache> {
+impl ParagraphCache {
     pub fn new() -> ParagraphCache {
         ParagraphCache::from_native_c(unsafe { skia_textlayout_ParagraphCache::new() })
     }

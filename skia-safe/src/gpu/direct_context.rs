@@ -1,8 +1,11 @@
 #[cfg(feature = "d3d")]
+#[cfg_attr(any(docsrs, feature = "nightly"), doc(cfg(feature = "d3d")))]
 use super::d3d;
 #[cfg(feature = "gl")]
+#[cfg_attr(any(docsrs, feature = "nightly"), doc(cfg(feature = "gl")))]
 use super::gl;
 #[cfg(feature = "vulkan")]
+#[cfg_attr(any(docsrs, feature = "nightly"), doc(cfg(feature = "vulkan")))]
 use super::vk;
 use super::ContextOptions;
 use crate::prelude::*;
@@ -16,7 +19,7 @@ impl NativeRefCountedBase for GrDirectContext {
     type Base = SkRefCntBase;
 }
 
-impl Deref for RCHandle<GrDirectContext> {
+impl Deref for DirectContext {
     type Target = GrDirectContext;
 
     fn deref(&self) -> &Self::Target {
@@ -24,14 +27,15 @@ impl Deref for RCHandle<GrDirectContext> {
     }
 }
 
-impl DerefMut for RCHandle<GrDirectContext> {
+impl DerefMut for DirectContext {
     fn deref_mut(&mut self) -> &mut Self::Target {
         unsafe { transmute_ref_mut(self) }
     }
 }
 
-impl RCHandle<GrDirectContext> {
+impl DirectContext {
     #[cfg(feature = "gl")]
+    #[cfg_attr(any(docsrs, feature = "nightly"), doc(cfg(feature = "gl")))]
     pub fn new_gl<'a>(
         interface: impl Into<Option<gl::Interface>>,
         options: impl Into<Option<&'a ContextOptions>>,
@@ -45,6 +49,7 @@ impl RCHandle<GrDirectContext> {
     }
 
     #[cfg(feature = "vulkan")]
+    #[cfg_attr(any(docsrs, feature = "nightly"), doc(cfg(feature = "vulkan")))]
     pub fn new_vulkan<'a>(
         backend_context: &vk::BackendContext,
         options: impl Into<Option<&'a ContextOptions>>,
@@ -64,6 +69,7 @@ impl RCHandle<GrDirectContext> {
     /// This function is unsafe because `device` and `queue` are untyped handles which need to exceed the
     /// lifetime of the context returned.
     #[cfg(feature = "metal")]
+    #[cfg_attr(any(docsrs, feature = "nightly"), doc(cfg(feature = "metal")))]
     pub unsafe fn new_metal<'a>(
         device: *mut std::ffi::c_void,
         queue: *mut std::ffi::c_void,
@@ -77,6 +83,7 @@ impl RCHandle<GrDirectContext> {
     }
 
     #[cfg(feature = "d3d")]
+    #[cfg_attr(any(docsrs, feature = "nightly"), doc(cfg(feature = "d3d")))]
     pub unsafe fn new_d3d<'a>(
         backend_context: &d3d::BackendContext,
         options: impl Into<Option<&'a ContextOptions>>,

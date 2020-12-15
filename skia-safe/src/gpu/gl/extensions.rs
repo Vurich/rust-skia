@@ -19,7 +19,7 @@ impl NativeClone for GrGLExtensions {
     }
 }
 
-impl Handle<GrGLExtensions> {
+impl Extensions {
     // TODO: support new() / init?
 
     pub fn is_initialized(&self) -> bool {

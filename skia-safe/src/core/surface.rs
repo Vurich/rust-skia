@@ -493,35 +493,6 @@ impl Surface {
         }
     }
 
-    // After deprecated since 0.30.0 (m85), the default flush() behavior changed in m86.
-    // For more information, take a look at the documentation in Skia's SkSurface.h
-    #[cfg(feature = "gpu")]
-    pub fn flush(&mut self) {
-        let info = gpu::FlushInfo::default();
-        self.flush_with_mutable_state(&info, None);
-    }
-
-    #[cfg(feature = "gpu")]
-    pub fn flush_with_access_info(
-        &mut self,
-        access: BackendSurfaceAccess,
-        info: &gpu::FlushInfo,
-    ) -> gpu::SemaphoresSubmitted {
-        unsafe { self.native_mut().flush(access, info.native()) }
-    }
-
-    #[cfg(feature = "gpu")]
-    pub fn flush_with_mutable_state<'a>(
-        &mut self,
-        info: &gpu::FlushInfo,
-        new_state: impl Into<Option<&'a gpu::BackendSurfaceMutableState>>,
-    ) -> gpu::SemaphoresSubmitted {
-        unsafe {
-            self.native_mut()
-                .flush1(info.native(), new_state.into().native_ptr_or_null())
-        }
-    }
-
     // TODO: wait()
 
     pub fn characterize(&self) -> Option<SurfaceCharacterization> {
@@ -538,6 +509,36 @@ impl Surface {
                 self.native_mut(),
                 deferred_display_list.into().into_ptr() as *const _,
             )
+        }
+    }
+}
+
+#[cfg(feature = "gpu")]
+#[cfg_attr(any(docsrs, feature = "nightly"), doc(cfg(feature = "gpu")))]
+impl Surface {
+    // After deprecated since 0.30.0 (m85), the default flush() behavior changed in m86.
+    // For more information, take a look at the documentation in Skia's SkSurface.h
+    pub fn flush(&mut self) {
+        let info = gpu::FlushInfo::default();
+        self.flush_with_mutable_state(&info, None);
+    }
+
+    pub fn flush_with_access_info(
+        &mut self,
+        access: BackendSurfaceAccess,
+        info: &gpu::FlushInfo,
+    ) -> gpu::SemaphoresSubmitted {
+        unsafe { self.native_mut().flush(access, info.native()) }
+    }
+
+    pub fn flush_with_mutable_state<'a>(
+        &mut self,
+        info: &gpu::FlushInfo,
+        new_state: impl Into<Option<&'a gpu::BackendSurfaceMutableState>>,
+    ) -> gpu::SemaphoresSubmitted {
+        unsafe {
+            self.native_mut()
+                .flush1(info.native(), new_state.into().native_ptr_or_null())
         }
     }
 }

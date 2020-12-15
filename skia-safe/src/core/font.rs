@@ -5,80 +5,67 @@ use crate::{
 };
 use skia_bindings as sb;
 use skia_bindings::{SkFont, SkFont_PrivFlags};
-use std::{
-    ops::{Deref, DerefMut},
-    ptr,
-};
+use std::ptr;
 
 pub use skia_bindings::SkFont_Edging as Edging;
-
-/// A font specification. This includes a `Typeface` but additionally specifies the parameters needed
-/// to actually render text such as font size. See the constructors for more information.
-///
-/// This type does not do internal caching, and recreating it every time you need to render text should
-/// not harm performance.
-#[repr(transparent)]
-pub struct Font(SkFont);
-
-impl NativeTransmutable<SkFont> for Font {}
-
-impl Deref for Font {
-    type Target = SkFont;
-
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
+#[test]
+fn test_font_edging_naming() {
+    let _ = Edging::Alias;
 }
 
-impl DerefMut for Font {
-    fn deref_mut(&mut self) -> &mut Self::Target {
-        &mut self.0
-    }
-}
-
+pub type Font = Handle<SkFont>;
 unsafe impl Send for Font {}
 unsafe impl Sync for Font {}
 
-impl Drop for Font {
+impl NativeDrop for SkFont {
     fn drop(&mut self) {
-        unsafe { sb::C_SkFont_destruct(&mut self.0) }
+        unsafe { sb::C_SkFont_destruct(self) }
     }
 }
 
-impl PartialEq for Font {
+impl NativePartialEq for SkFont {
     fn eq(&self, rhs: &Self) -> bool {
-        unsafe { sb::C_SkFont_Equals(&self.0, &rhs.0) }
+        unsafe { sb::C_SkFont_Equals(self, rhs) }
     }
 }
 
 impl Default for Font {
     fn default() -> Self {
-        Self::new()
+        Self::from_native_c(unsafe { SkFont::new() })
     }
 }
 
-impl From<Typeface> for Font {
-    fn from(other: Typeface) -> Self {
-        unsafe { Self(SkFont::new2(other.into())) }
-    }
-}
-
-impl Font {
-    pub fn new() -> Self {
-        unsafe { Self(SkFont::new()) }
+impl Handle<SkFont> {
+    pub fn new(typeface: impl Into<Typeface>, size: impl Into<Option<scalar>>) -> Self {
+        Self::from_typeface(typeface, size)
     }
 
-    pub fn new_with_typeface_size(typeface: impl Into<Typeface>, size: scalar) -> Self {
-        unsafe { Self(SkFont::new1(typeface.into().into(), size)) }
+    pub fn from_typeface(typeface: impl Into<Typeface>, size: impl Into<Option<scalar>>) -> Self {
+        match size.into() {
+            None => Self::construct(|font| unsafe {
+                sb::C_SkFont_ConstructFromTypeface(font, typeface.into().into_ptr())
+            }),
+            Some(size) => Self::construct(|font| unsafe {
+                sb::C_SkFont_ConstructFromTypefaceWithSize(font, typeface.into().into_ptr(), size)
+            }),
+        }
     }
 
-    pub fn new_with_params(
+    pub fn from_typeface_with_params(
         typeface: impl Into<Typeface>,
         size: scalar,
-        scale_x: scalar,
-        skew_x: scalar,
+        scale: scalar,
+        skew: scalar,
     ) -> Self {
-        unsafe { Self(SkFont::new3(typeface.into().into(), size, scale_x, skew_x)) }
+        Self::construct(|font| unsafe {
+            sb::C_SkFont_ConstructFromTypefaceWithSizeScaleAndSkew(
+                font,
+                typeface.into().into_ptr(),
+                size,
+                scale,
+                skew,
+            )
+        })
     }
 
     pub fn is_force_auto_hinting(&self) -> bool {
@@ -407,27 +394,17 @@ impl Font {
     }
 }
 
-#[cfg(test)]
-mod tests {
-    use super::{Edging, Font, Typeface};
+#[test]
+fn test_flags() {
+    let mut font = Font::new(Typeface::default(), 10.0);
 
-    #[test]
-    fn test_font_edging_naming() {
-        let _ = Edging::Alias;
-    }
+    font.set_force_auto_hinting(true);
+    assert!(font.is_force_auto_hinting());
+    font.set_force_auto_hinting(false);
+    assert!(!font.is_force_auto_hinting());
 
-    #[test]
-    fn test_flags() {
-        let mut font = Font::new(Typeface::default(), 10.0);
-
-        font.set_force_auto_hinting(true);
-        assert!(font.is_force_auto_hinting());
-        font.set_force_auto_hinting(false);
-        assert!(!font.is_force_auto_hinting());
-
-        font.set_embolden(true);
-        assert!(font.is_embolden());
-        font.set_embolden(false);
-        assert!(!font.is_embolden());
-    }
+    font.set_embolden(true);
+    assert!(font.is_embolden());
+    font.set_embolden(false);
+    assert!(!font.is_embolden());
 }

@@ -27,7 +27,7 @@ impl Default for RefHandle<SkShaper> {
     }
 }
 
-impl RefHandle<SkShaper> {
+impl Shaper {
     pub fn new_primitive() -> Self {
         Self::from_ptr(unsafe { sb::C_SkShaper_MakePrimitive() }).unwrap()
     }
@@ -95,7 +95,7 @@ impl NativeDrop for SkShaper_FontRunIterator {
     }
 }
 
-impl RefHandle<SkShaper_FontRunIterator> {
+impl FontRunIterator {
     pub fn current_font(&self) -> &Font {
         Font::from_native_ref(unsafe {
             &*sb::C_SkShaper_FontRunIterator_currentFont(self.native())
@@ -103,7 +103,7 @@ impl RefHandle<SkShaper_FontRunIterator> {
     }
 }
 
-impl RefHandle<SkShaper> {
+impl Shaper {
     pub fn new_font_mgr_run_iterator<'a>(
         utf8: &'a str,
         font: &Font,
@@ -143,13 +143,13 @@ impl NativeDrop for SkShaper_BiDiRunIterator {
     }
 }
 
-impl RefHandle<SkShaper_BiDiRunIterator> {
+impl BiDiRunIterator {
     pub fn current_level(&self) -> u8 {
         unsafe { sb::C_SkShaper_BiDiRunIterator_currentLevel(self.native()) }
     }
 }
 
-impl RefHandle<SkShaper> {
+impl Shaper {
     pub fn new_bidi_run_iterator(utf8: &str, bidi_level: u8) -> Option<Borrows<BiDiRunIterator>> {
         let bytes = utf8.as_bytes();
         BiDiRunIterator::from_ptr(unsafe {
@@ -184,7 +184,7 @@ impl NativeDrop for SkShaper_ScriptRunIterator {
     }
 }
 
-impl RefHandle<SkShaper_ScriptRunIterator> {
+impl ScriptRunIterator {
     pub fn current_script(&self) -> FourByteTag {
         FourByteTag::from_native_c(unsafe {
             sb::C_SkShaper_ScriptRunIterator_currentScript(self.native())
@@ -192,7 +192,7 @@ impl RefHandle<SkShaper_ScriptRunIterator> {
     }
 }
 
-impl RefHandle<SkShaper> {
+impl Shaper {
     pub fn new_script_run_iterator(utf8: &str, script: FourByteTag) -> Borrows<ScriptRunIterator> {
         let bytes = utf8.as_bytes();
         ScriptRunIterator::from_ptr(unsafe {
@@ -233,7 +233,7 @@ impl NativeDrop for SkShaper_LanguageRunIterator {
     }
 }
 
-impl RefHandle<SkShaper_LanguageRunIterator> {
+impl LanguageRunIterator {
     pub fn current_language(&self) -> &CStr {
         unsafe {
             CStr::from_ptr(sb::C_SkShaper_LanguageRunIterator_currentLanguage(
@@ -243,7 +243,7 @@ impl RefHandle<SkShaper_LanguageRunIterator> {
     }
 }
 
-impl RefHandle<SkShaper> {
+impl Shaper {
     pub fn new_std_language_run_iterator(utf8: &str) -> Option<LanguageRunIterator> {
         // a LanguageRunIterator never accesses the UTF8 string, so it's safe to
         // not borrow the string.
@@ -416,7 +416,7 @@ impl<'a, T: RunHandler> AsRunHandler<'a> for T {
     }
 }
 
-impl RefHandle<SkShaper> {
+impl Shaper {
     pub fn shape<'a, 'b: 'a>(
         &self,
         utf8: &str,
@@ -638,7 +638,7 @@ impl AsNativeRunHandler for TextBlobBuilderRunHandler<'_> {
     }
 }
 
-impl RefHandle<SkShaper> {
+impl Shaper {
     pub fn shape_text_blob(
         &self,
         text: &str,

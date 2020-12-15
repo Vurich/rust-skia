@@ -1,10 +1,14 @@
 #[cfg(feature = "d3d")]
+#[cfg_attr(any(docsrs, feature = "nightly"), doc(cfg(feature = "d3d")))]
 use super::d3d;
 #[cfg(feature = "gl")]
+#[cfg_attr(any(docsrs, feature = "nightly"), doc(cfg(feature = "gl")))]
 use super::gl;
 #[cfg(feature = "metal")]
+#[cfg_attr(any(docsrs, feature = "nightly"), doc(cfg(feature = "metal")))]
 use super::mtl;
 #[cfg(feature = "vulkan")]
+#[cfg_attr(any(docsrs, feature = "nightly"), doc(cfg(feature = "vulkan")))]
 use super::vk;
 use super::{BackendAPI, BackendSurfaceMutableState};
 use crate::prelude::*;
@@ -34,22 +38,25 @@ impl Default for BackendFormat {
     }
 }
 
-impl Handle<GrBackendFormat> {
+impl BackendFormat {
     pub fn new() -> Self {
         Self::construct(|bf| unsafe { sb::C_GrBackendFormat_Construct(bf) })
     }
 
     #[cfg(feature = "gl")]
+    #[cfg_attr(any(docsrs, feature = "nightly"), doc(cfg(feature = "gl")))]
     pub fn new_gl(format: gl::Enum, target: gl::Enum) -> Self {
         Self::construct(|bf| unsafe { sb::C_GrBackendFormat_ConstructGL(bf, format, target) })
     }
 
     #[cfg(feature = "vulkan")]
+    #[cfg_attr(any(docsrs, feature = "nightly"), doc(cfg(feature = "vulkan")))]
     pub fn new_vulkan(format: vk::Format) -> Self {
         Self::construct(|bf| unsafe { sb::C_GrBackendFormat_ConstructVk(bf, format) })
     }
 
     #[cfg(feature = "vulkan")]
+    #[cfg_attr(any(docsrs, feature = "nightly"), doc(cfg(feature = "vulkan")))]
     pub fn new_vulkan_ycbcr(conversion_info: &vk::YcbcrConversionInfo) -> Self {
         Self::construct(|bf| unsafe {
             sb::C_GrBackendFormat_ConstructVk2(bf, conversion_info.native())
@@ -57,11 +64,13 @@ impl Handle<GrBackendFormat> {
     }
 
     #[cfg(feature = "metal")]
+    #[cfg_attr(any(docsrs, feature = "nightly"), doc(cfg(feature = "metal")))]
     pub fn new_metal(format: mtl::PixelFormat) -> Self {
         Self::construct(|bf| unsafe { sb::C_GrBackendFormat_ConstructMtl(bf, format) })
     }
 
     #[cfg(feature = "d3d")]
+    #[cfg_attr(any(docsrs, feature = "nightly"), doc(cfg(feature = "d3d")))]
     pub fn new_dxgi(format: d3d::DXGI_FORMAT) -> Self {
         Self::construct(|bf| unsafe {
             sb::C_GrBackendFormat_ConstructDxgi(bf, format.into_native())
@@ -85,11 +94,13 @@ impl Handle<GrBackendFormat> {
 
     #[deprecated(since = "0.19.0", note = "use as_gl_format()")]
     #[cfg(feature = "gl")]
+    #[cfg_attr(any(docsrs, feature = "nightly"), doc(cfg(feature = "gl")))]
     pub fn gl_format(&self) -> Option<gl::Enum> {
         Some(self.as_gl_format() as _)
     }
 
     #[cfg(feature = "gl")]
+    #[cfg_attr(any(docsrs, feature = "nightly"), doc(cfg(feature = "gl")))]
     pub fn as_gl_format(&self) -> gl::Format {
         unsafe {
             #[allow(clippy::map_clone)]
@@ -99,22 +110,26 @@ impl Handle<GrBackendFormat> {
 
     #[deprecated(since = "0.19.0", note = "use as_vk_format()")]
     #[cfg(feature = "vulkan")]
+    #[cfg_attr(any(docsrs, feature = "nightly"), doc(cfg(feature = "vulkan")))]
     pub fn vulkan_format(&self) -> Option<vk::Format> {
         self.as_vk_format()
     }
 
     #[cfg(feature = "vulkan")]
+    #[cfg_attr(any(docsrs, feature = "nightly"), doc(cfg(feature = "vulkan")))]
     pub fn as_vk_format(&self) -> Option<vk::Format> {
         let mut r = vk::Format::UNDEFINED;
         unsafe { self.native().asVkFormat(&mut r) }.if_true_some(r)
     }
 
     #[cfg(feature = "metal")]
+    #[cfg_attr(any(docsrs, feature = "nightly"), doc(cfg(feature = "metal")))]
     pub fn as_mtl_format(&self) -> mtl::PixelFormat {
         unsafe { self.native().asMtlFormat() }
     }
 
     #[cfg(feature = "d3d")]
+    #[cfg_attr(any(docsrs, feature = "nightly"), doc(cfg(feature = "d3d")))]
     pub fn as_dxgi_format(&self) -> Option<d3d::DXGI_FORMAT> {
         let mut f = sb::DXGI_FORMAT::DXGI_FORMAT_UNKNOWN;
         unsafe { self.native().asDxgiFormat(&mut f) }
@@ -148,8 +163,9 @@ impl NativeClone for GrBackendTexture {
     }
 }
 
-impl Handle<GrBackendTexture> {
+impl BackendTexture {
     #[cfg(feature = "gl")]
+    #[cfg_attr(any(docsrs, feature = "nightly"), doc(cfg(feature = "gl")))]
     pub unsafe fn new_gl(
         (width, height): (i32, i32),
         mipmapped: super::Mipmapped,
@@ -162,6 +178,7 @@ impl Handle<GrBackendTexture> {
     }
 
     #[cfg(feature = "vulkan")]
+    #[cfg_attr(any(docsrs, feature = "nightly"), doc(cfg(feature = "vulkan")))]
     pub unsafe fn new_vulkan((width, height): (i32, i32), vk_info: &vk::ImageInfo) -> Self {
         Self::from_native_if_valid(construct(|texture| {
             sb::C_GrBackendTexture_ConstructVk(texture, width, height, vk_info.native())
@@ -170,6 +187,7 @@ impl Handle<GrBackendTexture> {
     }
 
     #[cfg(feature = "metal")]
+    #[cfg_attr(any(docsrs, feature = "nightly"), doc(cfg(feature = "metal")))]
     pub unsafe fn new_metal(
         (width, height): (i32, i32),
         mipmapped: super::Mipmapped,
@@ -188,6 +206,7 @@ impl Handle<GrBackendTexture> {
     }
 
     #[cfg(feature = "d3d")]
+    #[cfg_attr(any(docsrs, feature = "nightly"), doc(cfg(feature = "d3d")))]
     pub fn new_d3d((width, height): (i32, i32), d3d_info: &d3d::TextureResourceInfo) -> Self {
         unsafe {
             Self::from_native_if_valid(construct(|texture| {
@@ -231,6 +250,7 @@ impl Handle<GrBackendTexture> {
     }
 
     #[cfg(feature = "gl")]
+    #[cfg_attr(any(docsrs, feature = "nightly"), doc(cfg(feature = "gl")))]
     pub fn gl_texture_info(&self) -> Option<gl::TextureInfo> {
         unsafe {
             let mut texture_info = gl::TextureInfo::default();
@@ -241,11 +261,13 @@ impl Handle<GrBackendTexture> {
     }
 
     #[cfg(feature = "gl")]
+    #[cfg_attr(any(docsrs, feature = "nightly"), doc(cfg(feature = "gl")))]
     pub fn gl_texture_parameters_modified(&mut self) {
         unsafe { self.native_mut().glTextureParametersModified() }
     }
 
     #[cfg(feature = "vulkan")]
+    #[cfg_attr(any(docsrs, feature = "nightly"), doc(cfg(feature = "vulkan")))]
     pub fn vulkan_image_info(&self) -> Option<vk::ImageInfo> {
         unsafe {
             // constructor not available.
@@ -257,12 +279,14 @@ impl Handle<GrBackendTexture> {
     }
 
     #[cfg(feature = "vulkan")]
+    #[cfg_attr(any(docsrs, feature = "nightly"), doc(cfg(feature = "vulkan")))]
     pub fn set_vulkan_image_layout(&mut self, layout: vk::ImageLayout) -> &mut Self {
         unsafe { self.native_mut().setVkImageLayout(layout) }
         self
     }
 
     #[cfg(feature = "metal")]
+    #[cfg_attr(any(docsrs, feature = "nightly"), doc(cfg(feature = "metal")))]
     pub fn metal_texture_info(&self) -> Option<mtl::TextureInfo> {
         unsafe {
             let mut texture_info = mtl::TextureInfo::default();
@@ -273,6 +297,7 @@ impl Handle<GrBackendTexture> {
     }
 
     #[cfg(feature = "d3d")]
+    #[cfg_attr(any(docsrs, feature = "nightly"), doc(cfg(feature = "d3d")))]
     pub fn d3d_texture_resource_info(&self) -> Option<d3d::TextureResourceInfo> {
         unsafe {
             let mut info = sb::GrD3DTextureResourceInfo::default();
@@ -286,6 +311,7 @@ impl Handle<GrBackendTexture> {
     }
 
     #[cfg(feature = "d3d")]
+    #[cfg_attr(any(docsrs, feature = "nightly"), doc(cfg(feature = "d3d")))]
     pub fn set_d3d_resource_state(&mut self, resource_state: d3d::ResourceStateEnum) -> &mut Self {
         unsafe { self.native_mut().setD3DResourceState(resource_state) }
         self
@@ -329,8 +355,9 @@ impl NativeClone for GrBackendRenderTarget {
     }
 }
 
-impl Handle<GrBackendRenderTarget> {
+impl BackendRenderTarget {
     #[cfg(feature = "gl")]
+    #[cfg_attr(any(docsrs, feature = "nightly"), doc(cfg(feature = "gl")))]
     pub fn new_gl(
         (width, height): (i32, i32),
         sample_count: impl Into<Option<usize>>,
@@ -350,6 +377,7 @@ impl Handle<GrBackendRenderTarget> {
     }
 
     #[cfg(feature = "vulkan")]
+    #[cfg_attr(any(docsrs, feature = "nightly"), doc(cfg(feature = "vulkan")))]
     pub fn new_vulkan(
         (width, height): (i32, i32),
         sample_count: impl Into<Option<usize>>,
@@ -367,6 +395,7 @@ impl Handle<GrBackendRenderTarget> {
     }
 
     #[cfg(feature = "metal")]
+    #[cfg_attr(any(docsrs, feature = "nightly"), doc(cfg(feature = "metal")))]
     pub fn new_metal(
         (width, height): (i32, i32),
         sample_cnt: i32,
@@ -384,6 +413,7 @@ impl Handle<GrBackendRenderTarget> {
     }
 
     #[cfg(feature = "d3d")]
+    #[cfg_attr(any(docsrs, feature = "nightly"), doc(cfg(feature = "d3d")))]
     pub fn new_d3d((width, height): (i32, i32), d3d_info: &d3d::TextureResourceInfo) -> Self {
         Self::construct(|brt| unsafe {
             sb::C_GrBackendRenderTarget_ConstructD3D(brt, width, height, d3d_info.native())
@@ -428,30 +458,35 @@ impl Handle<GrBackendRenderTarget> {
     }
 
     #[cfg(feature = "gl")]
+    #[cfg_attr(any(docsrs, feature = "nightly"), doc(cfg(feature = "gl")))]
     pub fn gl_framebuffer_info(&self) -> Option<gl::FramebufferInfo> {
         let mut info = gl::FramebufferInfo::default();
         unsafe { self.native().getGLFramebufferInfo(info.native_mut()) }.if_true_some(info)
     }
 
     #[cfg(feature = "vulkan")]
+    #[cfg_attr(any(docsrs, feature = "nightly"), doc(cfg(feature = "vulkan")))]
     pub fn vulkan_image_info(&self) -> Option<vk::ImageInfo> {
         let mut info = vk::ImageInfo::default();
         unsafe { self.native().getVkImageInfo(info.native_mut()) }.if_true_some(info)
     }
 
     #[cfg(feature = "vulkan")]
+    #[cfg_attr(any(docsrs, feature = "nightly"), doc(cfg(feature = "vulkan")))]
     pub fn set_vulkan_image_layout(&mut self, layout: vk::ImageLayout) -> &mut Self {
         unsafe { self.native_mut().setVkImageLayout(layout) }
         self
     }
 
     #[cfg(feature = "metal")]
+    #[cfg_attr(any(docsrs, feature = "nightly"), doc(cfg(feature = "metal")))]
     pub fn metal_texture_info(&self) -> Option<mtl::TextureInfo> {
         let mut info = mtl::TextureInfo::default();
         unsafe { self.native().getMtlTextureInfo(info.native_mut()) }.if_true_some(info)
     }
 
     #[cfg(feature = "d3d")]
+    #[cfg_attr(any(docsrs, feature = "nightly"), doc(cfg(feature = "d3d")))]
     pub fn d3d_texture_resource_info(&self) -> Option<d3d::TextureResourceInfo> {
         let mut info = sb::GrD3DTextureResourceInfo::default();
         unsafe { self.native().getD3DTextureResourceInfo(&mut info) }.if_true_then_some(|| {
@@ -461,6 +496,7 @@ impl Handle<GrBackendRenderTarget> {
     }
 
     #[cfg(feature = "d3d")]
+    #[cfg_attr(any(docsrs, feature = "nightly"), doc(cfg(feature = "d3d")))]
     pub fn set_d3d_resource_state(&mut self, resource_state: d3d::ResourceStateEnum) -> &mut Self {
         unsafe { self.native_mut().setD3DResourceState(resource_state) }
         self

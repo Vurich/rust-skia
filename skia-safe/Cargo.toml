@@ -59,6 +59,9 @@ gpu = []
 svg = ["skia-bindings/svg"]
 shaper = ["textlayout", "skia-bindings/shaper"]
 
+# Used to enable nightly features
+nightly = []
+
 [dependencies]
 bitflags = "1.2"
 lazy_static = "1.4"

@@ -12,7 +12,7 @@ impl NativeRefCountedBase for skia_textlayout_FontCollection {
     type Base = sb::SkRefCntBase;
 }
 
-impl RCHandle<skia_textlayout_FontCollection> {
+impl FontCollection {
     pub fn new() -> Self {
         Self::from_ptr(unsafe { sb::C_FontCollection_new() }).unwrap()
     }
@@ -152,7 +152,7 @@ impl NativeDrop for sb::Typefaces {
     }
 }
 
-impl Handle<sb::Typefaces> {
+impl Typefaces {
     pub fn new() -> Self {
         Typefaces::construct(|tf| unsafe { sb::C_Typefaces_construct(tf) })
     }

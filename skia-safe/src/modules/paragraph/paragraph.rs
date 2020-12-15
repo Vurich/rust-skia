@@ -15,7 +15,7 @@ impl NativeDrop for sb::skia_textlayout_Paragraph {
     }
 }
 
-impl RefHandle<sb::skia_textlayout_Paragraph> {
+impl Paragraph {
     pub fn max_width(&self) -> scalar {
         self.native().fWidth
     }
@@ -135,7 +135,7 @@ impl AsRef<[TextBox]> for TextBoxes {
     }
 }
 
-impl Handle<sb::TextBoxes> {
+impl TextBoxes {
     pub fn iter(&self) -> impl Iterator<Item = &TextBox> {
         self.as_slice().iter()
     }

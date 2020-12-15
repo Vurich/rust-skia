@@ -118,7 +118,7 @@ impl NativeDrop for Sk3DView {
     }
 }
 
-impl RefHandle<Sk3DView> {
+impl View3D {
     pub fn new() -> Self {
         View3D::from_ptr(unsafe { sb::C_Sk3DView_new() }).unwrap()
     }

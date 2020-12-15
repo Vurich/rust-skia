@@ -15,7 +15,7 @@ impl NativeDrop for SkImageGenerator {
     }
 }
 
-impl RefHandle<SkImageGenerator> {
+impl ImageGenerator {
     pub fn unique_id(&self) -> u32 {
         self.native().fUniqueID
     }
