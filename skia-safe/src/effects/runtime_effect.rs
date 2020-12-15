@@ -48,6 +48,7 @@ impl Uniform {
     }
 
     #[cfg(feature = "gpu")]
+    #[cfg_attr(any(docsrs, feature = "nightly"), doc(cfg(feature = "gpu")))]
     pub fn gpu_type(&self) -> crate::private::gpu::SLType {
         self.native().fGPUType
     }

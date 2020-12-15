@@ -1,4 +1,5 @@
 #[cfg(feature = "gpu")]
+#[cfg_attr(any(docsrs, feature = "nightly"), doc(cfg(feature = "gpu")))]
 use crate::gpu;
 use crate::prelude::*;
 use crate::{
@@ -85,6 +86,7 @@ impl Surface {
 }
 
 #[cfg(feature = "gpu")]
+#[cfg_attr(any(docsrs, feature = "nightly"), doc(cfg(feature = "gpu")))]
 impl Surface {
     pub fn from_backend_texture(
         context: &mut gpu::Context,
@@ -152,6 +154,7 @@ impl Surface {
     }
 
     #[cfg(feature = "metal")]
+    #[cfg_attr(any(docsrs, feature = "nightly"), doc(cfg(feature = "metal")))]
     pub fn from_ca_metal_layer(
         context: &mut gpu::RecordingContext,
         layer: gpu::mtl::Handle,
@@ -178,6 +181,7 @@ impl Surface {
     }
 
     #[cfg(feature = "metal")]
+    #[cfg_attr(any(docsrs, feature = "nightly"), doc(cfg(feature = "metal")))]
     #[deprecated(since = "0.36.0", note = "use from_mtk_view()")]
     pub fn from_ca_mtk_view(
         context: &mut gpu::Context,
@@ -200,6 +204,7 @@ impl Surface {
     }
 
     #[cfg(feature = "metal")]
+    #[cfg_attr(any(docsrs, feature = "nightly"), doc(cfg(feature = "metal")))]
     pub fn from_mtk_view(
         context: &mut gpu::RecordingContext,
         mtk_view: gpu::mtl::Handle,
@@ -302,6 +307,7 @@ impl Surface {
 }
 
 #[cfg(feature = "gpu")]
+#[cfg_attr(any(docsrs, feature = "nightly"), doc(cfg(feature = "gpu")))]
 impl Surface {
     #[deprecated(
         since = "0.35.0",
@@ -514,6 +520,7 @@ impl Surface {
 }
 
 #[cfg(feature = "gpu")]
+#[cfg_attr(any(docsrs, feature = "nightly"), doc(cfg(feature = "gpu")))]
 #[cfg_attr(any(docsrs, feature = "nightly"), doc(cfg(feature = "gpu")))]
 impl Surface {
     // After deprecated since 0.30.0 (m85), the default flush() behavior changed in m86.

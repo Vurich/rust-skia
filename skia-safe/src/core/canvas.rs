@@ -297,11 +297,13 @@ impl Canvas {
         note = "Removed, only recording_context() is supported."
     )]
     #[cfg(feature = "gpu")]
+    #[cfg_attr(any(docsrs, feature = "nightly"), doc(cfg(feature = "gpu")))]
     pub fn gpu_context(&mut self) -> ! {
         panic!("Removed");
     }
 
     #[cfg(feature = "gpu")]
+    #[cfg_attr(any(docsrs, feature = "nightly"), doc(cfg(feature = "gpu")))]
     pub fn recording_context(&mut self) -> Option<gpu::RecordingContext> {
         gpu::RecordingContext::from_unshared_ptr(unsafe {
             sb::C_SkCanvas_recordingContext(self.native_mut())

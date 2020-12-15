@@ -39,6 +39,7 @@ impl Default for Handle<SkSurfaceCharacterization> {
 //       layout differs, should we support that?
 impl SurfaceCharacterization {
     #[cfg(feature = "gpu")]
+    #[cfg_attr(any(docsrs, feature = "nightly"), doc(cfg(feature = "gpu")))]
     pub fn resized(&self, size: impl Into<crate::ISize>) -> Self {
         let size = size.into();
         Self::construct(|sc| unsafe {
@@ -64,6 +65,7 @@ impl SurfaceCharacterization {
     }
 
     #[cfg(feature = "gpu")]
+    #[cfg_attr(any(docsrs, feature = "nightly"), doc(cfg(feature = "gpu")))]
     pub fn with_backend_format(
         &self,
         color_type: crate::ColorType,
@@ -80,6 +82,7 @@ impl SurfaceCharacterization {
     }
 
     #[cfg(feature = "gl")]
+    #[cfg_attr(any(docsrs, feature = "nightly"), doc(cfg(feature = "gl")))]
     pub fn with_fbo0(&self, uses_glfbo0: bool) -> Self {
         Self::construct(|sc| unsafe {
             sb::C_SkSurfaceCharacterization_createFBO0(self.native(), uses_glfbo0, sc)
@@ -88,6 +91,7 @@ impl SurfaceCharacterization {
 }
 
 #[cfg(feature = "gpu")]
+#[cfg_attr(any(docsrs, feature = "nightly"), doc(cfg(feature = "gpu")))]
 impl SurfaceCharacterization {
     // TODO: contextInfo() / refContextInfo()
 
@@ -175,6 +179,7 @@ impl SurfaceCharacterization {
     }
 
     #[cfg(feature = "gpu")]
+    #[cfg_attr(any(docsrs, feature = "nightly"), doc(cfg(feature = "gpu")))]
     pub fn is_compatible(&self, backend_texture: &gpu::BackendTexture) -> bool {
         unsafe { self.native().isCompatible(backend_texture.native()) }
     }
