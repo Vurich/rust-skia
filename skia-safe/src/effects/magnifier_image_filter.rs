@@ -1,5 +1,5 @@
 use crate::prelude::*;
-use crate::{image_filter::CropRect, image_filters, scalar, IRect, ImageFilter, Rect};
+use crate::{image_filter::CropRect, effects::image_filters, scalar, IRect, ImageFilter, Rect};
 use skia_bindings as sb;
 
 impl ImageFilter {

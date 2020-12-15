@@ -11,7 +11,7 @@ pub mod animation;
 
 mod core;
 mod docs;
-mod effects;
+pub mod effects;
 
 #[cfg(feature = "gpu")]
 #[cfg_attr(any(docsrs, feature = "nightly"), doc(cfg(feature = "gpu")))]
@@ -34,12 +34,11 @@ extern crate bitflags;
 extern crate lazy_static;
 
 // Prelude re-exports
-pub use crate::prelude::{Borrows, ConditionallySend, Handle, RCHandle, Sendable};
+pub use crate::prelude::{Borrows, ConditionallySend, Handle, RCHandle, RefHandle, Sendable};
 
 /// All Sk* types are accessible via skia_safe::
 pub use crate::core::*;
 pub use crate::docs::*;
-pub use crate::effects::*;
 pub use crate::modules::*;
 pub use crate::pathops::*;
 

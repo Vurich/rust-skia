@@ -1,5 +1,5 @@
 use crate::prelude::*;
-use crate::{image_filter::CropRect, image_filters, IRect, ImageFilter};
+use crate::{image_filter::CropRect, effects::image_filters, IRect, ImageFilter};
 use skia_bindings as sb;
 use skia_bindings::SkImageFilter;
 use std::convert::TryInto;

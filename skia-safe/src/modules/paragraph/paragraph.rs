@@ -7,8 +7,7 @@ use crate::{scalar, Canvas, Point};
 use skia_bindings as sb;
 use std::ops::{Index, Range};
 
-/// A simple multiline text block with homogenous text style. This must be created from a
-/// [super::ParagraphBuilder].
+/// A multiline text block. This must be created from a [super::ParagraphBuilder].
 pub type Paragraph = RefHandle<sb::skia_textlayout_Paragraph>;
 
 unsafe impl Send for Paragraph {}
@@ -106,6 +105,7 @@ impl Paragraph {
         })
     }
 
+    /// Returns the list of bounding boxes for any [super::Placeholder]s in the paragraph.
     pub fn get_rects_for_placeholders(&self) -> TextBoxes {
         TextBoxes::construct(|tb| unsafe {
             sb::C_Paragraph_getRectsForPlaceholders(self.native_mut_force(), tb)

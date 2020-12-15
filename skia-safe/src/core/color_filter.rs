@@ -88,7 +88,7 @@ impl ColorFilter {
 
 pub mod color_filters {
     use crate::prelude::*;
-    use crate::{scalar, BlendMode, Color, ColorFilter, ColorMatrix};
+    use crate::{effects::ColorMatrix, scalar, BlendMode, Color, ColorFilter};
     use skia_bindings as sb;
 
     pub fn compose(

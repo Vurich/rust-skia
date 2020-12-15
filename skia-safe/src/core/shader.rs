@@ -1,6 +1,7 @@
 use crate::prelude::*;
 use crate::{
-    gradient_shader, scalar, Color, ColorFilter, Image, Matrix, NativeFlattenable, Point, TileMode,
+    effects::gradient_shader, scalar, Color, ColorFilter, Image, Matrix, NativeFlattenable, Point,
+    TileMode,
 };
 use skia_bindings as sb;
 use skia_bindings::{SkFlattenable, SkRefCntBase, SkShader};

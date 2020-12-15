@@ -1,3 +1,6 @@
+//! Effects to use with [crate::Paint]. These affect how paths and other elements are drawn.
+//! If you want to define your own effect using a custom shader, see [RuntimeEffect].
+
 mod _1d_path_effect;
 pub use _1d_path_effect::*;
 
@@ -22,7 +25,6 @@ pub mod displacement_map_effect;
 pub mod drop_shadow_image_filter;
 pub mod gradient_shader;
 pub mod high_contrast_filter;
-pub use high_contrast_filter::{high_contrast_config, HighContrastConfig};
 pub mod image_filters;
 pub mod image_source;
 #[deprecated(since = "0.33.0", note = "No longer supported")]

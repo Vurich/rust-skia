@@ -101,6 +101,13 @@ impl Varying {
     }
 }
 
+/// An effect defined as a shader, written in Skia's custom GLSL-derived shader language "SkSL".
+/// For information on SkSL you can see [Google's repository](https://github.com/google/skia/tree/master/src/sksl),
+/// which has a readme describing the language and how to use it. Additionally, the Skia repository contains some
+/// examples of SkSL code, which can be found in `.fp` files, such as
+/// [here](https://github.com/google/skia/tree/master/src/gpu/gradients).
+///
+/// This language is mostly considered by Skia's team to be internal, and so documentation on it is sparse.
 pub type RuntimeEffect = RCHandle<SkRuntimeEffect>;
 
 impl NativeRefCountedBase for SkRuntimeEffect {

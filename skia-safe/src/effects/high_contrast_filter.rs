@@ -1,10 +1,9 @@
-use crate::high_contrast_config::InvertStyle;
-use crate::prelude::*;
-use crate::{scalar, ColorFilter};
+use self::config::InvertStyle;
+use crate::{prelude::*, scalar, ColorFilter};
+use sb::SkHighContrastConfig;
 use skia_bindings as sb;
-use skia_bindings::SkHighContrastConfig;
 
-pub mod high_contrast_config {
+pub mod config {
     pub use skia_bindings::SkHighContrastConfig_InvertStyle as InvertStyle;
     #[test]
     fn invert_style_naming() {

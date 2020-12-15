@@ -1,4 +1,4 @@
-use crate::{image_filters, scalar, IRect, ImageFilter};
+use crate::{effects::image_filters, scalar, IRect, ImageFilter};
 
 impl ImageFilter {
     pub fn dilate<'a>(
