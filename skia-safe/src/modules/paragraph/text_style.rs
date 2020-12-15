@@ -25,7 +25,7 @@ bitflags! {
         const UNDERLINE = sb::skia_textlayout_TextDecoration::kUnderline as _;
         /// A horizontal line above each line of the text.
         const OVERLINE = sb::skia_textlayout_TextDecoration::kOverline as _;
-        /// A horizontal line through each line of the centerline of the text (often
+        /// A horizontal line through the centerline of each line of the text (often
         /// referred to as strikethrough).
         const LINE_THROUGH = sb::skia_textlayout_TextDecoration::kLineThrough as _;
     }
@@ -441,7 +441,7 @@ impl TextStyle {
 
     /// Get the baseline of the text. The default is [TextBaseline::Alphabetic], which specifies that
     /// the glyphs for characters such as y, j, q (depending on font), as well as many characters in
-    /// languages such as Chinese, may go below the baseline of the text. [TextBaseline::Lexographic]
+    /// languages such as Chinese, may go below the baseline of the text. [TextBaseline::Ideographic]
     /// specifies that each line of text will be raised such that these glyphs will not be drawn below
     /// the baseline of the text. This does not affect the vertical positions of the glyphs in relation
     /// to one another, just their relation to the baseline.
@@ -451,7 +451,7 @@ impl TextStyle {
 
     /// Set the baseline of the text. The default is [TextBaseline::Alphabetic], which specifies that
     /// the glyphs for characters such as y, j, q (depending on font), as well as many characters in
-    /// languages such as Chinese, may go below the baseline of the text. [TextBaseline::Lexographic]
+    /// languages such as Chinese, may go below the baseline of the text. [TextBaseline::Ideographic]
     /// specifies that each line of text will be raised such that these glyphs will not be drawn below
     /// the baseline of the text. This does not affect the vertical positions of the glyphs in relation
     /// to one another, just their relation to the baseline.

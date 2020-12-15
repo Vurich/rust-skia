@@ -8,7 +8,7 @@ use skia_bindings as sb;
 use std::ops::{Index, Range};
 
 /// A simple multiline text block with homogenous text style. This must be created from a
-/// [ParagraphBuilder].
+/// [super::ParagraphBuilder].
 pub type Paragraph = RefHandle<sb::skia_textlayout_Paragraph>;
 
 unsafe impl Send for Paragraph {}
