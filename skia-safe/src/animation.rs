@@ -237,14 +237,24 @@ impl Animation {
         Self::open_cstr(&path)
     }
 
+    /// Get the animation's duration, in seconds.
     pub fn duration(&self) -> f64 {
         self.native().fDuration
     }
 
+    /// Get the animation's duration, in frames.
+    pub fn num_frames(&self) -> f64 {
+        self.duration() * self.fps()
+    }
+
+    /// Get the framerate of this animation, in frames per second.
     pub fn fps(&self) -> f64 {
         self.native().fFPS
     }
 
+    /// Get the size of this animation, in pixels. This is the size of the whole animation, and
+    /// not the bounding box of a single frame. To get the bounding box of a single frame, seek
+    /// to it with either `seek_frame` or `seek_time` and extract the `DirtyRegion`.
     pub fn size(&self) -> Size {
         Size::new(self.native().fSize.fWidth, self.native().fSize.fHeight)
     }
@@ -289,7 +299,8 @@ impl Animation {
     }
 
     /// Seek to the specified frame. Inputs with fractional components (such as 0.5, 1.2) will show the
-    /// interpolated frame between the closest whole keyframes before and after.
+    /// interpolated frame between the closest whole keyframes before and after. A frame greater than
+    /// the number of frames in the animation will seek to the final frame.
     ///
     /// This function can optionally return a [DirtyRegion], see that type's documentation for what this
     /// means. If in doubt, keep with the default return type of `()`.
@@ -312,6 +323,8 @@ impl Animation {
     /// let mut anim = Animation::open("data/my-animation.json").unwrap();
     ///
     /// let region = anim.seek_frame::<DirtyRegion>(0.);
+    ///
+    /// println!("{:?}", region.bounds());
     /// ```
     pub fn seek_frame<O: SeekResult>(&mut self, frame: f64) -> O {
         let mut out = O::default();
@@ -324,7 +337,9 @@ impl Animation {
         out
     }
 
-    /// Seek to the specified time in the animation.
+    /// Seek to the specified time, in seconds, in the animation. If the time is greater than
+    /// `self.duration()`, then it will seek to the closest frame (i.e. the final frame). To
+    /// loop the animation, seek to `time % duration`.
     ///
     /// This function can optionally return a [DirtyRegion], see that type's documentation for what this
     /// means. If in doubt, keep with the default return type of `()`.
@@ -347,6 +362,8 @@ impl Animation {
     /// let mut anim = Animation::open("data/my-animation.json").unwrap();
     ///
     /// let region = anim.seek_time::<DirtyRegion>(0.);
+    ///
+    /// println!("{:?}", region.bounds());
     /// ```
     pub fn seek_time<O: SeekResult>(&mut self, time: f64) -> O {
         let mut out = O::default();
