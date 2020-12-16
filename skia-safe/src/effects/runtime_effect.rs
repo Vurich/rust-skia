@@ -110,7 +110,7 @@ impl Varying {
 /// This language is mostly considered by Skia's team to be internal, and so documentation on it is sparse, but
 /// with some knowledge of GLSL it's relatively straightforward to learn how to write code using it.
 ///
-/// Skia also has the concept of "fragment processors", which are essentially a combination of shader and C++ class,
+/// Skia also has the concept of "fragment processors", which are essentially a combination of shader and C++ code,
 /// and which need to be compiled independently. These bindings make no attempt to expose any interface to this.
 pub type RuntimeEffect = RCHandle<SkRuntimeEffect>;
 
