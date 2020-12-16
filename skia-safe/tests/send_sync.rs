@@ -122,7 +122,7 @@ mod docs {
 }
 
 mod effects {
-    use skia_safe::{runtime_effect, RuntimeEffect};
+    use skia_safe::effects::{runtime_effect, RuntimeEffect};
     use static_assertions::*;
 
     assert_impl_all!(runtime_effect::Uniform: Send, Sync);

@@ -164,7 +164,7 @@ impl Iterator for RawIter<'_> {
 }
 
 /// A Skia shape. This is just the abstract shape, which could be either a fill or a stroke
-/// depending on the defined paint (see the documentation for `Paint`). This type is
+/// depending on the defined paint (see the documentation for [crate::Paint]). This type is
 /// copy-on-write, and so cloning it will share underlying storage until it is mutated.
 pub type Path = Handle<SkPath>;
 
@@ -197,7 +197,7 @@ impl Default for Handle<SkPath> {
 
 impl Path {
     /// Create a path from a set of points and the associated verbs. Verbs are here specified
-    /// as bytes, one byte per verb. The `Verb` enum is 32 bits, and you can get the bytes needed
+    /// as bytes, one byte per verb. The [Verb] enum is 32 bits, and you can get the bytes needed
     /// for this function by simply using `foo_verb as u8`.
     ///
     /// Set `fill_type` to choose winding vs even-odd fill mode.
@@ -286,7 +286,7 @@ impl Path {
         })
     }
 
-    /// Create a rounded rectangle, optionally specifying winding order (see documentation for `RRect` for
+    /// Create a rounded rectangle, optionally specifying winding order (see documentation for [RRect] for
     /// more info).
     pub fn rrect(rect: impl AsRef<RRect>, dir: impl Into<Option<PathDirection>>) -> Self {
         Self::construct(|path| unsafe {
@@ -298,7 +298,7 @@ impl Path {
         })
     }
 
-    /// Create a rounded rectangle, optionally specifying winding order (see documentation for `RRect` for
+    /// Create a rounded rectangle, optionally specifying winding order (see documentation for [RRect] for
     /// more info). A rounded rectangle is made out of multiple segments, and this allows you to select
     /// which segment is considered the "first" one.
     pub fn rrect_with_start_index(
@@ -353,7 +353,7 @@ impl Path {
 
     /// Returns true if this path can be interpolated with the path specified by `compare`. This is
     /// true if both paths have the same number of segments, and the verb for each segment matches.
-    /// If the verb is `Conic`, then the weights must match.
+    /// If the verb is [Verb::Conic], then the weights must match.
     pub fn is_interpolatable(&self, compare: &Path) -> bool {
         unsafe { self.native().isInterpolatable(compare.native()) }
     }
@@ -371,24 +371,24 @@ impl Path {
         .if_true_some(out)
     }
 
-    /// Returns the fill rule for this path (see documentation for `PathFillType`).
+    /// Returns the fill rule for this path (see documentation for [PathFillType]).
     pub fn fill_type(&self) -> PathFillType {
         unsafe { sb::C_SkPath_getFillType(self.native()) }
     }
 
-    /// Sets the fill rule for this path (see documentation for `PathFillType`).
+    /// Sets the fill rule for this path (see documentation for [PathFillType]).
     pub fn set_fill_type(&mut self, ft: PathFillType) -> &mut Self {
         self.native_mut().set_fFillType(ft as _);
         self
     }
 
-    /// Returns true if the fill type is an "inverse" type (see documentation for `PathFillType`).
+    /// Returns true if the fill type is an "inverse" type (see documentation for [PathFillType]).
     pub fn is_inverse_fill_type(&self) -> bool {
         self.fill_type().is_inverse()
     }
 
     /// Sets the fill type of this path to be the "inverted" equivalent of the current fill type
-    /// (see `PathFillType`)
+    /// (see [PathFillType])
     pub fn toggle_inverse_fill_type(&mut self) -> &mut Self {
         let inverse = self.native().fFillType() ^ 2;
         self.native_mut().set_fFillType(inverse);
@@ -400,14 +400,14 @@ impl Path {
         unsafe { sb::C_SkPath_isConvex(self.native()) }
     }
 
-    /// If the path is an oval, returns the bounding rectangle. Otherwise, returns `None`.
+    /// If the path is an oval, returns the bounding rectangle. Otherwise, returns [None].
     pub fn is_oval(&self) -> Option<Rect> {
         let mut bounds = Rect::default();
         unsafe { self.native().isOval(bounds.native_mut()) }.if_true_some(bounds)
     }
 
-    /// If the path is a rounded rectangle, returns the `RRect` that specifies its shape. Otherwise,
-    /// returns `None`.
+    /// If the path is a rounded rectangle, returns the [RRect] that specifies its shape. Otherwise,
+    /// returns [None].
     pub fn is_rrect(&self) -> Option<RRect> {
         let mut rrect = RRect::default();
         unsafe { self.native().isRRect(rrect.native_mut()) }.if_true_some(rrect)
@@ -504,7 +504,7 @@ impl Path {
         }
     }
 
-    /// If this path is a single line, return the start- and endpoints. Otherwise, return `None`.
+    /// If this path is a single line, return the start- and endpoints. Otherwise, return [None].
     pub fn is_line(&self) -> Option<(Point, Point)> {
         let mut line = [Point::default(); 2];
         unsafe { self.native().isLine(line.native_mut().as_mut_ptr()) }
@@ -764,7 +764,7 @@ impl Path {
     }
 
     /// Append an arc curve to this path, that is part of the oval defined by xy rotated by `x_axis_rotate`
-    /// (specified in degrees). The `PathDirection` specifies whether it is clockwise or anticlockwise and
+    /// (specified in degrees). The [PathDirection] specifies whether it is clockwise or anticlockwise and
     /// `large_arc` specifies whether the smaller or larger of the two arc lengths is chosen. The arc ends
     /// at `xy`.
     pub fn arc_to_rotated(
@@ -784,7 +784,7 @@ impl Path {
     }
 
     /// Append an arc curve to this path, that is part of the oval defined by xy rotated by `x_axis_rotate`
-    /// (specified in degrees). The `PathDirection` specifies whether it is clockwise or anticlockwise and
+    /// (specified in degrees). The [PathDirection] specifies whether it is clockwise or anticlockwise and
     /// `large_arc` specifies whether the smaller or larger of the two arc lengths is chosen. The arc ends
     /// at `cursor + xy`.
     pub fn r_arc_to_rotated(
@@ -842,7 +842,7 @@ impl Path {
 
     // TODO: return type is probably worth a struct.
     /// If the path is equivalent to a rectangle when filled, returns a tuple with the rectangle, whether
-    /// the rectangle is closed, and the direction of the path. Otherwise, returns `None`.
+    /// the rectangle is closed, and the direction of the path. Otherwise, returns [None].
     pub fn is_rect(&self) -> Option<(Rect, bool, PathDirection)> {
         let mut rect = Rect::default();
         let mut is_closed = Default::default();
@@ -956,7 +956,7 @@ impl Path {
     // TODO: addPoly(initializer_list)
 
     /// Combine this path with `src`, with positions in `src` offset by the vector `d`.
-    /// `AddPathMode::Append` combines the shapes without connecting them, `AddPathMode::Extend`
+    /// [AddPathMode::Append] combines the shapes without connecting them, [AddPathMode::Extend]
     /// connects the current cursor to the start of the `src` path if the current contour is not closed.
     pub fn add_path(
         &mut self,
@@ -972,7 +972,7 @@ impl Path {
 
     // TODO: rename to add_path_with_matrix() ?
     /// Combine this path with `src`, with positions in `src` transformed by the matrix `matrix`.
-    /// `AddPathMode::Append` combines the shapes without connecting them, `AddPathMode::Extend`
+    /// [AddPathMode::Append] combines the shapes without connecting them, [AddPathMode::Extend]
     /// connects the current cursor to the start of the `src` path if the current contour is not closed.
     pub fn add_path_matrix(
         &mut self,
@@ -989,7 +989,7 @@ impl Path {
     }
 
     /// Combine this path with `src`, from end to start, with positions in `src` offset by the vector `d`.
-    /// This is always treated as `AddPathMode::Extend` (i.e. always connects the current cursor with the
+    /// This is always treated as [AddPathMode::Extend] (i.e. always connects the current cursor with the
     /// end point of `src`).
     pub fn reverse_add_path(&mut self, src: &Path) -> &mut Self {
         unsafe { self.native_mut().reverseAddPath(src.native()) };
@@ -1026,12 +1026,12 @@ impl Path {
 
     /// Create a new path that is the same as this one but transformed by the matrix `matrix`.
     ///
-    /// In the case that `perspective_clip` is `ApplyPerspectiveClip::Yes`: If the matrix has a bottom row other
+    /// In the case that `perspective_clip` is [ApplyPerspectiveClip::Yes]: If the matrix has a bottom row other
     /// than `0, 0, 1` (i.e. if it transforms the `w` component of the path's points) then the points will
     /// be perspective clipped, which avoids dividing by zero or returning negative values for `w`. This is
     /// usually what you want as it avoids confusing results.
     ///
-    /// In the case that `perspective_clip` is `ApplyPerspectiveClip::No`: The math is applied in a "brute force"
+    /// In the case that `perspective_clip` is [ApplyPerspectiveClip::No]: The math is applied in a "brute force"
     /// manner, meaning that strange results may occur when the matrix has a bottom row that transforms the `w`
     /// component.
     pub fn with_transform_with_perspective_clip(
@@ -1059,12 +1059,12 @@ impl Path {
 
     /// Transform this path in-place by the matrix `matrix`.
     ///
-    /// In the case that `perspective_clip` is `ApplyPerspectiveClip::Yes`: If the matrix has a bottom row other
+    /// In the case that `perspective_clip` is [ApplyPerspectiveClip::Yes]: If the matrix has a bottom row other
     /// than `0, 0, 1` (i.e. if it transforms the `w` component of the path's points) then the points will
     /// be perspective clipped, which avoids dividing by zero or returning negative values for `w`. This is
     /// usually what you want as it avoids confusing results.
     ///
-    /// In the case that `perspective_clip` is `ApplyPerspectiveClip::No`: The math is applied in a "brute force"
+    /// In the case that `perspective_clip` is [ApplyPerspectiveClip::No]: The math is applied in a "brute force"
     /// manner, meaning that strange results may occur when the matrix has a bottom row that transforms the `w`
     /// component.
     pub fn transform_with_perspective_clip(
@@ -1125,7 +1125,7 @@ impl Path {
         unsafe { self.native().contains(p.x, p.y) }
     }
 
-    /// Write this path out to a value of type `SkData`. This is for debugging purposes, if you want to write
+    /// Write this path out to a value of type [Data]. This is for debugging purposes, if you want to write
     /// the path out in a format that can be read back later, you should use `fn serialize`.
     pub fn dump_as_data(&self, dump_as_hex: bool) -> Data {
         let mut stream = DynamicMemoryWStream::new();

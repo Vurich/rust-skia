@@ -1,20 +1,18 @@
 #[cfg(feature = "gpu")]
 #[cfg_attr(any(docsrs, feature = "nightly"), doc(cfg(feature = "gpu")))]
-use crate::gpu;
+use crate::gpu::{self, BackendRenderTarget};
 use crate::prelude::*;
 use crate::{
-    Bitmap, Canvas, DeferredDisplayList, IPoint, IRect, ISize, Image, ImageInfo, Paint, Pixmap,
-    Size, SurfaceCharacterization, SurfaceProps,
+    Bitmap, Budgeted, Canvas, ColorSpace, ColorType, DeferredDisplayList, IPoint, IRect, ISize,
+    Image, ImageInfo, Paint, Pixmap, Size, SurfaceCharacterization, SurfaceProps,
 };
 use skia_bindings as sb;
 use skia_bindings::{SkRefCntBase, SkSurface};
 use std::ptr;
 
-pub use skia_bindings::SkSurface_ContentChangeMode as ContentChangeMode;
-
 pub use skia_bindings::SkSurface_BackendHandleAccess as BackendHandleAccess;
-
 pub use skia_bindings::SkSurface_BackendSurfaceAccess as BackendSurfaceAccess;
+pub use skia_bindings::SkSurface_ContentChangeMode as ContentChangeMode;
 
 pub type Surface = RCHandle<SkSurface>;
 
@@ -98,22 +96,22 @@ impl Surface {
         })
     }
 
-    /// Create a new surface from a render target (see the documentation for `BackendRenderTarget`
+    /// Create a new surface from a render target (see the documentation for [BackendRenderTarget]
     /// for more details). Usually, this is the framebuffer. You can set the destination color
     /// space, which affects how images are rendered, how gradients are calculated, how alpha
     /// blending and anti-aliasing work, etc. If in doubt, use `ColorSpace::new_srgb()`. Specifying
-    /// `None` defaults to legacy behaviour, which is not color-correct.
+    /// [None] defaults to legacy behaviour, which is not color-correct.
     ///
-    /// The `ColorType` _must_ match the `Format` specifed in the `FramebufferInfo` that was used to
-    /// create the `BackendRenderTarget`. `ColorType` is backend-agnostic, but the `Format` is
+    /// The [ColorType] _must_ match the `Format` specifed in the `FramebufferInfo` that was used to
+    /// create the [BackendRenderTarget]. [ColorType] is backend-agnostic, but the `Format` is
     /// specific to each backend, and right now there is no automatic conversion. Therefore, this
-    /// needs to be handled manually. If these values do not match, `None` is returned.
+    /// needs to be handled manually. If these values do not match, [None] is returned.
     pub fn from_backend_render_target<'a>(
         context: &'a mut gpu::Context,
-        backend_render_target: &'a gpu::BackendRenderTarget,
+        backend_render_target: &'a BackendRenderTarget,
         origin: gpu::SurfaceOrigin,
-        color_type: crate::ColorType,
-        color_space: impl Into<Option<crate::ColorSpace>>,
+        color_type: ColorType,
+        color_space: impl Into<Option<ColorSpace>>,
         surface_props: impl Into<Option<&'a SurfaceProps>>,
     ) -> Option<Self> {
         Self::from_ptr(unsafe {
@@ -128,19 +126,6 @@ impl Surface {
         })
     }
 
-    #[deprecated(since = "0.33.0", note = "removed without replacement")]
-    pub fn from_backend_texture_as_render_target(
-        _context: &mut gpu::Context,
-        _backend_texture: &gpu::BackendTexture,
-        _origin: gpu::SurfaceOrigin,
-        _sample_count: impl Into<Option<usize>>,
-        _color_type: crate::ColorType,
-        _color_space: impl Into<Option<crate::ColorSpace>>,
-        _surface_props: Option<&SurfaceProps>,
-    ) -> ! {
-        panic!("removed without replacement")
-    }
-
     #[cfg(feature = "metal")]
     #[cfg_attr(any(docsrs, feature = "nightly"), doc(cfg(feature = "metal")))]
     pub fn from_ca_metal_layer(
@@ -148,8 +133,8 @@ impl Surface {
         layer: gpu::mtl::Handle,
         origin: gpu::SurfaceOrigin,
         sample_count: impl Into<Option<usize>>,
-        color_type: crate::ColorType,
-        color_space: impl Into<Option<crate::ColorSpace>>,
+        color_type: ColorType,
+        color_space: impl Into<Option<ColorSpace>>,
         surface_props: Option<&SurfaceProps>,
     ) -> Option<(Self, gpu::mtl::Handle)> {
         let mut drawable = ptr::null();
@@ -170,36 +155,13 @@ impl Surface {
 
     #[cfg(feature = "metal")]
     #[cfg_attr(any(docsrs, feature = "nightly"), doc(cfg(feature = "metal")))]
-    #[deprecated(since = "0.36.0", note = "use from_mtk_view()")]
-    pub fn from_ca_mtk_view(
-        context: &mut gpu::Context,
-        mtk_view: gpu::mtl::Handle,
-        origin: gpu::SurfaceOrigin,
-        sample_count: impl Into<Option<usize>>,
-        color_type: crate::ColorType,
-        color_space: impl Into<Option<crate::ColorSpace>>,
-        surface_props: Option<&SurfaceProps>,
-    ) -> Option<Self> {
-        Self::from_mtk_view(
-            context,
-            mtk_view,
-            origin,
-            sample_count,
-            color_type,
-            color_space,
-            surface_props,
-        )
-    }
-
-    #[cfg(feature = "metal")]
-    #[cfg_attr(any(docsrs, feature = "nightly"), doc(cfg(feature = "metal")))]
     pub fn from_mtk_view(
         context: &mut gpu::RecordingContext,
         mtk_view: gpu::mtl::Handle,
         origin: gpu::SurfaceOrigin,
         sample_count: impl Into<Option<usize>>,
-        color_type: crate::ColorType,
-        color_space: impl Into<Option<crate::ColorSpace>>,
+        color_type: ColorType,
+        color_space: impl Into<Option<ColorSpace>>,
         surface_props: Option<&SurfaceProps>,
     ) -> Option<Self> {
         Self::from_ptr(unsafe {
@@ -214,9 +176,10 @@ impl Surface {
             )
         })
     }
+
     pub fn new_render_target(
         context: &mut gpu::RecordingContext,
-        budgeted: crate::Budgeted,
+        budgeted: Budgeted,
         image_info: &ImageInfo,
         sample_count: impl Into<Option<usize>>,
         surface_origin: gpu::SurfaceOrigin,
@@ -239,7 +202,7 @@ impl Surface {
     pub fn new_render_target_with_characterization(
         context: &mut gpu::RecordingContext,
         characterization: &SurfaceCharacterization,
-        budgeted: crate::Budgeted,
+        budgeted: Budgeted,
     ) -> Option<Self> {
         Self::from_ptr(unsafe {
             sb::C_SkSurface_MakeRenderTarget2(
@@ -248,15 +211,6 @@ impl Surface {
                 budgeted.into_native(),
             )
         })
-    }
-
-    #[deprecated(since = "0.36.0", note = "Removed without replacement")]
-    pub fn from_backend_texture_with_caracterization(
-        _context: &mut gpu::Context,
-        _characterization: &SurfaceCharacterization,
-        _backend_texture: &gpu::BackendTexture,
-    ) -> ! {
-        panic!("Removed without replacement")
     }
 }
 
@@ -330,7 +284,7 @@ impl Surface {
     pub fn get_backend_render_target(
         &mut self,
         handle_access: BackendHandleAccess,
-    ) -> Option<gpu::BackendRenderTarget> {
+    ) -> Option<BackendRenderTarget> {
         unsafe {
             let mut backend_render_target =
                 construct(|rt| sb::C_GrBackendRenderTarget_Construct(rt));
@@ -340,7 +294,7 @@ impl Surface {
                 &mut backend_render_target,
             );
 
-            gpu::BackendRenderTarget::from_native_c_if_valid(backend_render_target)
+            BackendRenderTarget::from_native_c_if_valid(backend_render_target)
         }
     }
 
