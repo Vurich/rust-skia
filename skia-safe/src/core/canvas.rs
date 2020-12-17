@@ -1245,11 +1245,9 @@ mod tests {
         let mut canvas = Canvas::from_raster_direct_n32((2, 2), pixels.as_mut(), None).unwrap();
         let ii = canvas.image_info();
         let mut surface = canvas.new_surface(&ii, None).unwrap();
-        dbg!(&mut canvas as *mut _);
         drop(canvas);
 
         let canvas = surface.canvas();
-        dbg!(canvas as *mut _);
         canvas.clear(Color::RED);
     }
 

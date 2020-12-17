@@ -72,24 +72,26 @@ impl Canvas {
     }
 }
 
-#[test]
-fn test_svg() {
-    use crate::Paint;
+#[cfg(test)]
+mod tests {
+    #[test]
+    fn test_svg() {
+        use crate::Paint;
 
-    let mut canvas = Canvas::new(&Rect::from_size((20, 20)), None);
-    let paint = Paint::default();
-    canvas.draw_circle((10, 10), 10.0, &paint);
-    let data = canvas.end();
-    let contents = String::from_utf8_lossy(data.as_bytes());
-    dbg!(&contents);
-    assert!(contents.contains(r#"<ellipse cx="10" cy="10" rx="10" ry="10"/>"#));
-    assert!(contents.contains(r#"</svg>"#));
-}
+        let mut canvas = Canvas::new(&Rect::from_size((20, 20)), None);
+        let paint = Paint::default();
+        canvas.draw_circle((10, 10), 10.0, &paint);
+        let data = canvas.end();
+        let contents = String::from_utf8_lossy(data.as_bytes());
+        assert!(contents.contains(r#"<ellipse cx="10" cy="10" rx="10" ry="10"/>"#));
+        assert!(contents.contains(r#"</svg>"#));
+    }
 
-#[test]
-fn test_svg_without_ending() {
-    use crate::Paint;
-    let mut canvas = Canvas::new(&Rect::from_size((20, 20)), None);
-    let paint = Paint::default();
-    canvas.draw_circle((10, 10), 10.0, &paint);
+    #[test]
+    fn test_svg_without_ending() {
+        use crate::Paint;
+        let mut canvas = Canvas::new(&Rect::from_size((20, 20)), None);
+        let paint = Paint::default();
+        canvas.draw_circle((10, 10), 10.0, &paint);
+    }
 }

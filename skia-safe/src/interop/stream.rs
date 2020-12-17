@@ -158,8 +158,6 @@ impl<'a> RustStream<'a> {
         where
             T: io::Read,
         {
-            dbg!();
-
             let val: &mut T = &mut *(val as *mut _);
 
             if buf.is_null() {
@@ -223,9 +221,7 @@ impl<'a> RustStream<'a> {
                 val: *mut ffi::c_void,
                 pos: usize,
             ) -> bool {
-                dbg!();
-
-                let val: &mut T = &mut *(val as *mut _);
+                    let val: &mut T = &mut *(val as *mut _);
 
                 val.maybe_seek(io::SeekFrom::Start(pos as _)).is_some()
             }
@@ -234,9 +230,7 @@ impl<'a> RustStream<'a> {
                 val: *mut ffi::c_void,
                 offset: libc::c_long,
             ) -> bool {
-                dbg!();
-
-                let val: &mut T = &mut *(val as *mut _);
+                    let val: &mut T = &mut *(val as *mut _);
 
                 val.maybe_seek(io::SeekFrom::Current(offset as _)).is_some()
             }
