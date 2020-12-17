@@ -16,6 +16,7 @@ mod lib {
     pub const SKPARAGRAPH: &str = "skparagraph";
     pub const SKOTTIE: &str = "skottie";
     pub const SKSG: &str = "sksg";
+    pub const SVG: &str = "svg";
 }
 
 /// Feature identifiers define the additional configuration parts of the binaries to download.
@@ -214,6 +215,7 @@ impl FinalBuildConfiguration {
                 // This is enabled by default but isn't usable from Rust anyway
                 // since it's a template-based UI-building library.
                 ("skia_enable_skrive", no()),
+                ("skia_enable_svg", yes()),
                 ("skia_enable_gpu", yes_if(features.gpu())),
                 ("skia_enable_skottie", yes_if(features.lottie)),
                 (
@@ -373,6 +375,7 @@ impl FinalBuildConfiguration {
         let ninja_files = {
             let mut files = Vec::new();
             files.push("obj/skia.ninja".into());
+            files.push("obj/modules/svg/svg.ninja".into());
 
             if features.text_layout {
                 files.extend(vec![
@@ -418,6 +421,7 @@ impl FinalBuildConfiguration {
 
         if features.lottie {
             definitions.push(("SK_ENABLE_SKOTTIE".to_string(), None));
+            definitions.push(("SK_XML".to_string(), None));
         }
 
         FinalBuildConfiguration {
@@ -480,6 +484,8 @@ impl BinariesConfiguration {
         let mut built_libraries = HashSet::new();
         let mut additional_files = Vec::new();
         let feature_ids = features.ids();
+
+            built_libraries.insert(lib::SVG.into());
 
         if features.text_layout {
             additional_files.push(ICUDTL_DAT.into());

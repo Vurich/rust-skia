@@ -223,8 +223,11 @@ unsafe impl SeekResult for DirtyRegion {
     }
 }
 
+/// Error when something goes wrong when loading an animation. Sadly, Skia doesn't give further
+/// details so we can't return a more expressive error type, but we still use this instead of
+/// `Option` to express the intent and allow for `Try`.
 #[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
-struct AnimationLoadError;
+pub struct AnimationLoadError;
 
 impl fmt::Display for AnimationLoadError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
@@ -290,7 +293,7 @@ impl Animation {
         let path = CString::new(path.as_ref().to_string_lossy().into_owned().into_bytes())
             .expect("CString::new failed: path contains null bytes");
 
-        Self::open_cstr(&path).ok_or(AnimationLoadError)
+        Self::open_cstr(&path)
     }
 
     /// Get the animation's duration, in seconds.

@@ -128,6 +128,13 @@
 
 #endif // SK_ENABLE_SKOTTIE
 
+#ifdef SK_XML
+
+// modules
+#   include "modules/svg/include/SkSVGDOM.h"
+
+#endif // SK_XML
+
 //
 // codec/SkCodec.h
 //
@@ -3015,3 +3022,27 @@ extern "C" bool C_skottie_Animation_unique(const skottie::Animation* self) {
 }
 
 #endif // SK_ENABLE_SKOTTIE
+
+#ifdef SK_XML
+
+//
+// modules/svg/include/SkSVGDOM.h
+//
+
+extern "C" SkSVGDOM* C_SkSVGDOM_MakeFromStream(SkStream& stream) {
+    return SkSVGDOM::MakeFromStream(stream).release();
+}
+
+extern "C" void C_SkSVGDOM_ref(const SkSVGDOM* self) {
+    self->ref();
+}
+
+extern "C" void C_SkSVGDOM_unref(const SkSVGDOM* self) {
+    self->unref();
+}
+
+extern "C" bool C_SkSVGDOM_unique(const SkSVGDOM* self) {
+    return self->unique();
+}
+
+#endif // SK_XML

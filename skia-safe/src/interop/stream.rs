@@ -187,7 +187,7 @@ impl<'a> RustStream<'a> {
                     out_bytes
                 }) {
                     Ok(res) => res,
-                    Err(err) => {
+                    Err(_) => {
                         println!("Panic in FFI callback for `SkStream::read`");
                         std::process::abort();
                     }
@@ -217,7 +217,7 @@ impl<'a> RustStream<'a> {
             }
 
             impl<T> MaybeSeek for T {
-                default fn maybe_seek(&mut self, from: io::SeekFrom) -> Option<u64> {
+                default fn maybe_seek(&mut self, _: io::SeekFrom) -> Option<u64> {
                     None
                 }
             }
@@ -237,11 +237,15 @@ impl<'a> RustStream<'a> {
             ) -> bool {
                 let val: &mut T = &mut *(val as *mut _);
 
-                match std::panic::catch_unwind(|| {
-                    val.maybe_seek(io::SeekFrom::Start(pos as _)).is_some()
+                // This is OK because we just abort if it panics anyway, we don't try
+                // to continue at all.
+                let val = std::panic::AssertUnwindSafe(val);
+
+                match std::panic::catch_unwind(move || {
+                    val.0.maybe_seek(io::SeekFrom::Start(pos as _)).is_some()
                 }) {
                     Ok(res) => res,
-                    Err(err) => {
+                    Err(_) => {
                         println!("Panic in FFI callback for `SkStream::seek`");
                         std::process::abort();
                     }
@@ -254,11 +258,17 @@ impl<'a> RustStream<'a> {
             ) -> bool {
                 let val: &mut T = &mut *(val as *mut _);
 
-                match std::panic::catch_unwind(|| {
-                    val.maybe_seek(io::SeekFrom::Current(offset as _)).is_some()
+                // This is OK because we just abort if it panics anyway, we don't try
+                // to continue at all.
+                let val = std::panic::AssertUnwindSafe(val);
+
+                match std::panic::catch_unwind(move || {
+                    val.0
+                        .maybe_seek(io::SeekFrom::Current(offset as _))
+                        .is_some()
                 }) {
                     Ok(res) => res,
-                    Err(err) => {
+                    Err(_) => {
                         println!("Panic in FFI callback for `SkStream::move`");
                         std::process::abort();
                     }
