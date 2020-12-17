@@ -1,28 +1,26 @@
+#![deny(missing_docs)]
+
+//! Types and helpers related to creating paths and shapes programatically. See
+//! [crate::Canvas::draw_path] for how to draw the shape to the screen.
+//!
+//! See documentation for [Path].
+
 use crate::interop::DynamicMemoryWStream;
 use crate::matrix::ApplyPerspectiveClip;
 use crate::prelude::*;
 use crate::{
-    path_types, scalar, Data, Matrix, PathDirection, PathFillType, Point, RRect, Rect, Vector,
+    scalar, Data, Matrix, PathDirection, PathFillType, PathSegmentMask, Point, RRect, Rect, Vector,
 };
 use skia_bindings as sb;
-use skia_bindings::{SkPath, SkPath_Iter, SkPath_RawIter};
+use skia_bindings::{SkPath, SkPath_Iter};
 use std::marker::PhantomData;
 use std::mem::forget;
 
-#[deprecated(since = "0.25.0", note = "use PathDirection")]
-pub use path_types::PathDirection as Direction;
-
-#[deprecated(since = "0.25.0", note = "use PathFillType")]
-pub use path_types::PathFillType as FillType;
-
-pub use skia_bindings::SkPath_ArcSize as ArcSize;
-
 pub use skia_bindings::SkPath_AddPathMode as AddPathMode;
-
-pub use path_types::PathSegmentMask as SegmentMask;
-
+pub use skia_bindings::SkPath_ArcSize as ArcSize;
 pub use skia_bindings::SkPath_Verb as Verb;
 
+/// Iterator over components in a path and their associated verbs.
 #[repr(C)]
 pub struct Iter<'a>(SkPath_Iter, PhantomData<&'a Handle<SkPath>>);
 
@@ -30,6 +28,7 @@ impl NativeAccess<SkPath_Iter> for Iter<'_> {
     fn native(&self) -> &SkPath_Iter {
         &self.0
     }
+
     fn native_mut(&mut self) -> &mut SkPath_Iter {
         &mut self.0
     }
@@ -48,6 +47,8 @@ impl Default for Iter<'_> {
 }
 
 impl Iter<'_> {
+    /// Create a new iterator over the input path. If `force_close` is true, every contour (i.e.
+    /// individual contiguous component of the path) is ended with [Verb::Close].
     pub fn new(path: &Path, force_close: bool) -> Iter {
         Iter(
             unsafe { SkPath_Iter::new1(path.native(), force_close) },
@@ -55,6 +56,9 @@ impl Iter<'_> {
         )
     }
 
+    /// Create a new iterator over the input path, reusing this iterator's internal data. If
+    /// `force_close` is true, every contour (i.e. individual contiguous component of the
+    /// path) is ended with [Verb::Close].
     pub fn set_path(mut self, path: &Path, force_close: bool) -> Iter {
         unsafe {
             self.0.setPath(path.native(), force_close);
@@ -64,6 +68,7 @@ impl Iter<'_> {
         r
     }
 
+    /// If the most recently-produced element was a conic, returns the weight for the conic.
     pub fn conic_weight(&self) -> Option<scalar> {
         #[allow(clippy::map_clone)]
         self.native()
@@ -72,10 +77,16 @@ impl Iter<'_> {
             .map(|p| unsafe { *p })
     }
 
+    /// If the most recently-produced element was [Verb::Line], this function returns true if
+    /// the line was the result of a `close()` command. If the most recently-produced element
+    /// was _not_ [Verb::Line], the value returned by this function is not guaranteed to have
+    /// any meaning.
     pub fn is_close_line(&self) -> bool {
         unsafe { sb::C_SkPath_Iter_isCloseLine(self.native()) }
     }
 
+    /// Returns true if the contour (i.e. individual contiguous component of the path) that
+    /// is currently being iterated over is closed.
     pub fn is_closed_contour(&self) -> bool {
         unsafe { self.native().isClosedContour() }
     }
@@ -92,74 +103,6 @@ impl<'a> Iterator for Iter<'a> {
         } else {
             None
         }
-    }
-}
-
-#[repr(C)]
-#[deprecated(
-    since = "0.30.0",
-    note = "User Iter instead, RawIter will soon be removed."
-)]
-pub struct RawIter<'a>(SkPath_RawIter, PhantomData<&'a Handle<SkPath>>);
-
-#[allow(deprecated)]
-impl NativeAccess<SkPath_RawIter> for RawIter<'_> {
-    fn native(&self) -> &SkPath_RawIter {
-        &self.0
-    }
-    fn native_mut(&mut self) -> &mut SkPath_RawIter {
-        &mut self.0
-    }
-}
-
-#[allow(deprecated)]
-impl Drop for RawIter<'_> {
-    fn drop(&mut self) {
-        unsafe { sb::C_SkPath_RawIter_destruct(&mut self.0) }
-    }
-}
-
-#[allow(deprecated)]
-impl Default for RawIter<'_> {
-    fn default() -> Self {
-        RawIter(
-            construct(|ri| unsafe { sb::C_SkPath_RawIter_Construct(ri) }),
-            PhantomData,
-        )
-    }
-}
-
-#[allow(deprecated)]
-impl RawIter<'_> {
-    pub fn new(path: &Path) -> RawIter {
-        RawIter::default().set_path(path)
-    }
-
-    pub fn set_path(mut self, path: &Path) -> RawIter {
-        unsafe { self.native_mut().setPath(path.native()) }
-        let r = RawIter(self.0, PhantomData);
-        forget(self);
-        r
-    }
-
-    pub fn peek(&self) -> Verb {
-        unsafe { sb::C_SkPath_RawIter_peek(self.native()) }
-    }
-
-    pub fn conic_weight(&self) -> scalar {
-        self.native().fConicWeight
-    }
-}
-
-#[allow(deprecated)]
-impl Iterator for RawIter<'_> {
-    type Item = (Verb, Vec<Point>);
-
-    fn next(&mut self) -> Option<Self::Item> {
-        let mut points = [Point::default(); Verb::MAX_POINTS];
-
-        let verb = unsafe { self.native_mut().next(points.native_mut().as_mut_ptr()) };
-        (verb != Verb::Done).if_true_some((verb, points[0..verb.points()].into()))
     }
 }
 
@@ -209,7 +152,7 @@ impl Path {
         points: &[Point],
         verbs: &[u8],
         conic_weights: &[scalar],
-        fill_type: FillType,
+        fill_type: PathFillType,
         is_volatile: impl Into<Option<bool>>,
     ) -> Self {
         Self::construct(|path| unsafe {
@@ -326,7 +269,7 @@ impl Path {
     pub fn polygon(
         pts: &[Point],
         is_closed: bool,
-        fill_type: impl Into<Option<FillType>>,
+        fill_type: impl Into<Option<PathFillType>>,
         is_volatile: impl Into<Option<bool>>,
     ) -> Self {
         Self::construct(|path| unsafe {
@@ -335,7 +278,7 @@ impl Path {
                 pts.native().as_ptr(),
                 pts.len().try_into().unwrap(),
                 is_closed,
-                fill_type.into().unwrap_or(FillType::Winding),
+                fill_type.into().unwrap_or(PathFillType::Winding),
                 is_volatile.into().unwrap_or(false),
             )
         })
@@ -1115,8 +1058,8 @@ impl Path {
 
     /// Returns a bitset where the corresponding bit is set if the path contains one or more components of
     /// that type.
-    pub fn segment_masks(&self) -> SegmentMask {
-        SegmentMask::from_bits_truncate(unsafe { sb::C_SkPath_getSegmentMasks(self.native()) })
+    pub fn segment_masks(&self) -> PathSegmentMask {
+        PathSegmentMask::from_bits_truncate(unsafe { sb::C_SkPath_getSegmentMasks(self.native()) })
     }
 
     /// Returns true if the point `p` is within the path's outline.
