@@ -168,16 +168,30 @@ impl<'a> RustStream<'a> {
                 let mut out_bytes = 0;
                 let mut count = count;
 
-                while count > 0 {
-                    let bytes = match val.read(&mut buf[..count.min(BUF_SIZE)]) {
-                        Ok(0) => break,
-                        Ok(bytes) => bytes,
-                        Err(_) => 0,
-                    };
+                // This is OK because we just abort if it panics anyway, we don't try
+                // to continue at all.
+                let val = std::panic::AssertUnwindSafe(val);
 
-                    count -= bytes;
-                    out_bytes += bytes;
-                }
+                let out_bytes = match std::panic::catch_unwind(move || {
+                    while count > 0 {
+                        let bytes = match val.0.read(&mut buf[..count.min(BUF_SIZE)]) {
+                            Ok(0) => break,
+                            Ok(bytes) => bytes,
+                            Err(_) => 0,
+                        };
+
+                        count -= bytes;
+                        out_bytes += bytes;
+                    }
+
+                    out_bytes
+                }) {
+                    Ok(res) => res,
+                    Err(err) => {
+                        println!("Panic in FFI callback for `SkStream::read`");
+                        std::process::abort();
+                    }
+                };
 
                 out_bytes
             } else {
@@ -221,18 +235,34 @@ impl<'a> RustStream<'a> {
                 val: *mut ffi::c_void,
                 pos: usize,
             ) -> bool {
-                    let val: &mut T = &mut *(val as *mut _);
+                let val: &mut T = &mut *(val as *mut _);
 
-                val.maybe_seek(io::SeekFrom::Start(pos as _)).is_some()
+                match std::panic::catch_unwind(|| {
+                    val.maybe_seek(io::SeekFrom::Start(pos as _)).is_some()
+                }) {
+                    Ok(res) => res,
+                    Err(err) => {
+                        println!("Panic in FFI callback for `SkStream::seek`");
+                        std::process::abort();
+                    }
+                }
             }
 
             unsafe extern "C" fn seek_current_trampoline<T: MaybeSeek>(
                 val: *mut ffi::c_void,
                 offset: libc::c_long,
             ) -> bool {
-                    let val: &mut T = &mut *(val as *mut _);
+                let val: &mut T = &mut *(val as *mut _);
 
-                val.maybe_seek(io::SeekFrom::Current(offset as _)).is_some()
+                match std::panic::catch_unwind(|| {
+                    val.maybe_seek(io::SeekFrom::Current(offset as _)).is_some()
+                }) {
+                    Ok(res) => res,
+                    Err(err) => {
+                        println!("Panic in FFI callback for `SkStream::move`");
+                        std::process::abort();
+                    }
+                }
             }
 
             length = if let Some(cur) = val.maybe_seek(io::SeekFrom::Current(0)) {
