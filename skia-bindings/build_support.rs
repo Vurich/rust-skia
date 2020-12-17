@@ -2,7 +2,6 @@
 
 pub mod android;
 pub mod azure;
-pub mod binaries;
 pub mod cargo;
 pub mod clang;
 pub mod git;

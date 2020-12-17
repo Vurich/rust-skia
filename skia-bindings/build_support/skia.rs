@@ -1,6 +1,6 @@
 //! Full build support for the Skia library, SkiaBindings library and bindings.rs file.
 
-use crate::build_support::{android, binaries, cargo, clang, ios, llvm, vs, xcode};
+use crate::build_support::{android, cargo, clang, ios, llvm, vs, xcode};
 use bindgen::{CodegenConfig, EnumVariation};
 use cc::Build;
 use std::collections::HashSet;
@@ -595,10 +595,6 @@ impl BinariesConfiguration {
 
         cargo::add_link_libs(&self.link_libraries);
     }
-
-    pub fn key(&self, repository_short_hash: &str) -> String {
-        binaries::key(repository_short_hash, &self.feature_ids, self.skia_debug)
-    }
 }
 
 /// The full build of Skia, skia-bindings, and the generation of bindings.rs.
@@ -1021,13 +1017,7 @@ const OPAQUE_TYPES: &[&str] = &[
     "SkRasterHandleAllocator",
     "SkRefCnt",
     "SkShader",
-    "SkStream",
-    "SkStreamAsset",
-    "SkStreamMemory",
-    "SkStreamRewindable",
-    "SkStreamSeekable",
     "SkTypeface_LocalizedStrings",
-    "SkWStream",
     "GrVkMemoryAllocator",
     "SkShaper",
     "SkShaper_BiDiRunIterator",
