@@ -4,12 +4,14 @@
 //! any image into the scene.
 
 use std::{
+    error::Error,
     ffi::{CStr, CString},
+    fmt, io,
     ops::{Deref, DerefMut},
     path::Path,
 };
 
-use crate::{prelude::*, Canvas, FontMgr, RCHandle, Rect, Size};
+use crate::{interop::RustStream, prelude::*, Canvas, FontMgr, RCHandle, Rect, Size};
 use skia_bindings as sb;
 
 bitflags::bitflags! {
@@ -221,6 +223,27 @@ unsafe impl SeekResult for DirtyRegion {
     }
 }
 
+#[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+struct AnimationLoadError;
+
+impl fmt::Display for AnimationLoadError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "Failed to load animation (reason unknown)")
+    }
+}
+
+impl Error for AnimationLoadError {
+    fn description(&self) -> &str {
+        "Failed to load animation (reason unknown)"
+    }
+}
+
+impl From<AnimationLoadError> for io::Error {
+    fn from(other: AnimationLoadError) -> Self {
+        io::Error::new(io::ErrorKind::Other, other)
+    }
+}
+
 impl Animation {
     /// Parse the supplied .lottie file data and return an animation. Returns [None] if the data is
     /// somehow invalid.
@@ -232,6 +255,19 @@ impl Animation {
         Self::from_ptr(unsafe {
             sb::C_skottie_Animation_MakeFromData(data.as_ptr() as *const _, data.len())
         })
+    }
+
+    /// Load the animation from an arbitrary stream.
+    pub fn read<R: io::Read>(mut reader: R) -> Option<Self> {
+        let mut reader = RustStream::new(&mut reader);
+
+        let stream = reader.stream_mut();
+
+        let out = unsafe {
+            sb::C_skottie_Animation_MakeFromStream(stream)
+        };
+
+        Self::from_ptr(out)
     }
 
     /// Opens the .lottie file at the given path (expressed as a C string).

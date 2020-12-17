@@ -228,6 +228,7 @@ pub trait NativeHash {
 ///
 /// This type requires the trait `NativeDrop` to be implemented.
 #[repr(transparent)]
+#[derive(Debug)]
 pub struct Handle<N: NativeDrop>(
     N,
     // needed to suppress automatic Send and Sync derivation, which happens

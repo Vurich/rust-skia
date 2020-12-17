@@ -7,8 +7,7 @@ use crate::prelude::*;
 use crate::Data;
 use skia_bindings as sb;
 use skia_bindings::{SkDynamicMemoryWStream, SkMemoryStream, SkStream, SkStreamAsset, SkWStream};
-use std::marker::PhantomData;
-use std::ptr;
+use std::{ffi, io, marker::PhantomData, ptr};
 
 /// Trait representing an Skia allocated Stream type with a base class of SkStream.
 #[repr(transparent)]
@@ -131,15 +130,168 @@ impl DynamicMemoryWStream {
     }
 }
 
-#[test]
-fn detaching_empty_dynamic_memory_w_stream_leads_to_non_null_data() {
-    let mut stream = DynamicMemoryWStream::new();
-    let data = stream.detach_as_data();
-    assert_eq!(0, data.size())
+#[derive(Debug)]
+pub struct RustStream<'a> {
+    inner: Handle<sb::RustStream>,
+    _phantom: PhantomData<&'a mut ()>,
 }
 
-#[test]
-fn memory_stream_from_bytes() {
-    let stream = MemoryStream::from_bytes(&[1, 2, 3]);
-    drop(stream);
+impl RustStream<'_> {
+    pub fn stream_mut(&mut self) -> &mut SkStream {
+        self.inner.native_mut().base_mut()
+    }
+}
+
+impl NativeBase<SkStream> for sb::RustStream {}
+
+impl NativeDrop for sb::RustStream {
+    fn drop(&mut self) {}
+}
+
+impl<'a> RustStream<'a> {
+    pub fn new<T: io::Read>(val: &'a mut T) -> Self {
+        unsafe extern "C" fn read_trampoline<T>(
+            val: *mut ffi::c_void,
+            buf: *mut ffi::c_void,
+            count: usize,
+        ) -> usize
+        where
+            T: io::Read,
+        {
+            dbg!();
+
+            let val: &mut T = &mut *(val as *mut _);
+
+            if buf.is_null() {
+                const BUF_SIZE: usize = 128;
+
+                let mut buf = [0; BUF_SIZE];
+
+                let mut out_bytes = 0;
+                let mut count = count;
+
+                while count > 0 {
+                    let bytes = match val.read(&mut buf[..count.min(BUF_SIZE)]) {
+                        Ok(0) => break,
+                        Ok(bytes) => bytes,
+                        Err(_) => 0,
+                    };
+
+                    count -= bytes;
+                    out_bytes += bytes;
+                }
+
+                out_bytes
+            } else {
+                let buf: &mut [u8] = std::slice::from_raw_parts_mut(buf as _, count as _);
+
+                match val.read(buf) {
+                    Ok(bytes) => bytes,
+                    Err(_) => 0,
+                }
+            }
+        }
+
+        let (length, seek_start, seek_current): (
+            usize,
+            Option<unsafe extern "C" fn(_, _) -> _>,
+            Option<unsafe extern "C" fn(_, _) -> _>,
+        );
+
+        #[cfg(feature = "nightly")]
+        {
+            trait MaybeSeek {
+                fn maybe_seek(&mut self, from: io::SeekFrom) -> Option<u64>;
+            }
+
+            impl<T> MaybeSeek for T {
+                default fn maybe_seek(&mut self, from: io::SeekFrom) -> Option<u64> {
+                    None
+                }
+            }
+
+            impl<T> MaybeSeek for T
+            where
+                T: io::Seek,
+            {
+                fn maybe_seek(&mut self, from: io::SeekFrom) -> Option<u64> {
+                    self.seek(from).ok()
+                }
+            }
+
+            unsafe extern "C" fn seek_start_trampoline<T: MaybeSeek>(
+                val: *mut ffi::c_void,
+                pos: usize,
+            ) -> bool {
+                dbg!();
+
+                let val: &mut T = &mut *(val as *mut _);
+
+                val.maybe_seek(io::SeekFrom::Start(pos as _)).is_some()
+            }
+
+            unsafe extern "C" fn seek_current_trampoline<T: MaybeSeek>(
+                val: *mut ffi::c_void,
+                offset: libc::c_long,
+            ) -> bool {
+                dbg!();
+
+                let val: &mut T = &mut *(val as *mut _);
+
+                val.maybe_seek(io::SeekFrom::Current(offset as _)).is_some()
+            }
+
+            length = if let Some(cur) = val.maybe_seek(io::SeekFrom::Current(0)) {
+                let length = val.maybe_seek(io::SeekFrom::End(0)).unwrap();
+
+                val.maybe_seek(io::SeekFrom::Start(cur));
+
+                length as usize
+            } else {
+                std::usize::MAX
+            };
+
+            seek_start = Some(seek_start_trampoline::<T>);
+            seek_current = Some(seek_current_trampoline::<T>);
+        }
+
+        #[cfg(not(feature = "nightly"))]
+        {
+            length = std::usize::MAX;
+            seek_start = None;
+            seek_current = None;
+        }
+
+        RustStream {
+            inner: Handle::construct(|ptr| unsafe {
+                sb::C_RustStream_construct(
+                    ptr,
+                    val as *mut T as *mut ffi::c_void,
+                    length,
+                    Some(read_trampoline::<T>),
+                    seek_start,
+                    seek_current,
+                );
+            }),
+            _phantom: PhantomData,
+        }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{DynamicMemoryWStream, MemoryStream};
+
+    #[test]
+    fn detaching_empty_dynamic_memory_w_stream_leads_to_non_null_data() {
+        let mut stream = DynamicMemoryWStream::new();
+        let data = stream.detach_as_data();
+        assert_eq!(0, data.size())
+    }
+
+    #[test]
+    fn memory_stream_from_bytes() {
+        let stream = MemoryStream::from_bytes(&[1, 2, 3]);
+        drop(stream);
+    }
 }

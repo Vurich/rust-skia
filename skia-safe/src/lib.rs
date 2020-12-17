@@ -1,4 +1,4 @@
-#![cfg_attr(any(docsrs, feature = "nightly"), feature(doc_cfg))]
+#![cfg_attr(any(docsrs, feature = "nightly"), feature(doc_cfg, specialization))]
 
 pub mod codec;
 #[deprecated(since = "0.33.1", note = "use codec::Result")]
