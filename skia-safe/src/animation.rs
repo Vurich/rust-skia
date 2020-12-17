@@ -251,23 +251,22 @@ impl Animation {
     /// Since Lottie files may reference external data, this function will also return [None] if
     /// the file requests an external resource. If you want to be able to load external files,
     /// see [Builder].
-    pub fn from_data(data: &[u8]) -> Option<Self> {
+    pub fn from_data(data: &[u8]) -> Result<Self, AnimationLoadError> {
         Self::from_ptr(unsafe {
             sb::C_skottie_Animation_MakeFromData(data.as_ptr() as *const _, data.len())
         })
+        .ok_or(AnimationLoadError)
     }
 
     /// Load the animation from an arbitrary stream.
-    pub fn read<R: io::Read>(mut reader: R) -> Option<Self> {
+    pub fn read<R: io::Read>(mut reader: R) -> Result<Self, AnimationLoadError> {
         let mut reader = RustStream::new(&mut reader);
 
         let stream = reader.stream_mut();
 
-        let out = unsafe {
-            sb::C_skottie_Animation_MakeFromStream(stream)
-        };
+        let out = unsafe { sb::C_skottie_Animation_MakeFromStream(stream) };
 
-        Self::from_ptr(out)
+        Self::from_ptr(out).ok_or(AnimationLoadError)
     }
 
     /// Opens the .lottie file at the given path (expressed as a C string).
@@ -275,8 +274,9 @@ impl Animation {
     /// Since Lottie files may reference external data, this function will also return [None] if
     /// the file requests an external resource. If you want to be able to load external files,
     /// see [Builder].
-    pub fn open_cstr<P: AsRef<CStr>>(path: P) -> Option<Self> {
+    pub fn open_cstr<P: AsRef<CStr>>(path: P) -> Result<Self, AnimationLoadError> {
         Self::from_ptr(unsafe { sb::C_skottie_Animation_MakeFromFile(path.as_ref().as_ptr()) })
+            .ok_or(AnimationLoadError)
     }
 
     /// Opens the .lottie file at the given path. This function must allocate in order to create
@@ -286,11 +286,11 @@ impl Animation {
     /// Since Lottie files may reference external data, this function will also return [None] if
     /// the file requests an external resource. If you want to be able to load external files,
     /// see [Builder].
-    pub fn open<P: AsRef<Path>>(path: P) -> Option<Self> {
+    pub fn open<P: AsRef<Path>>(path: P) -> Result<Self, AnimationLoadError> {
         let path = CString::new(path.as_ref().to_string_lossy().into_owned().into_bytes())
             .expect("CString::new failed: path contains null bytes");
 
-        Self::open_cstr(&path)
+        Self::open_cstr(&path).ok_or(AnimationLoadError)
     }
 
     /// Get the animation's duration, in seconds.
