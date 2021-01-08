@@ -42,7 +42,6 @@ impl Default for BuildConfiguration {
             opt_level: cargo::env_var("OPT_LEVEL"),
             features: Features {
                 gl: cfg!(feature = "gl"),
-                skvm_jit: cfg!(feature = "skvm-jit"),
                 lottie: cfg!(feature = "lottie"),
                 pdf: cfg!(feature = "pdf"),
                 egl: cfg!(feature = "egl"),
@@ -95,9 +94,6 @@ pub struct BuildConfiguration {
 pub struct Features {
     /// Build with OpenGL support?
     pub gl: bool,
-
-    /// Build with (experimental) JIT support for SKVM?
-    pub skvm_jit: bool,
 
     /// Build with Lottie animation support?
     pub lottie: bool,
@@ -218,10 +214,6 @@ impl FinalBuildConfiguration {
                 ("skia_enable_svg", yes()),
                 ("skia_enable_gpu", yes_if(features.gpu())),
                 ("skia_enable_skottie", yes_if(features.lottie)),
-                (
-                    "skia_enable_skvm_jit_when_possible",
-                    yes_if(features.skvm_jit),
-                ),
                 ("skia_use_gl", yes_if(features.gl)),
                 ("skia_use_egl", yes_if(features.egl)),
                 ("skia_use_x11", yes_if(features.x11)),
@@ -289,10 +281,6 @@ impl FinalBuildConfiguration {
             let opt_level_arg;
             let mut cflags: Vec<&str> = vec![&target_str];
             let asmflags: Vec<&str> = vec![&target_str];
-
-            if features.skvm_jit {
-                cflags.push("-DSKVM_LLVM");
-            }
 
             if let Some(sysroot) = cargo::env_var("SDKROOT") {
                 sysroot_arg = format!("--sysroot={}", sysroot);
@@ -485,7 +473,7 @@ impl BinariesConfiguration {
         let mut additional_files = Vec::new();
         let feature_ids = features.ids();
 
-            built_libraries.insert(lib::SVG.into());
+        built_libraries.insert(lib::SVG.into());
 
         if features.text_layout {
             additional_files.push(ICUDTL_DAT.into());
@@ -501,12 +489,8 @@ impl BinariesConfiguration {
 
         let mut link_libraries = Vec::new();
 
-        if features.skvm_jit {
-            link_libraries.push("LLVM-10");
-        }
-
         match target.as_strs() {
-            (_, "unknown", "linux", Some("gnu")) => {
+            (_, "unknown", "linux", _) => {
                 link_libraries.extend(vec!["stdc++", "fontconfig", "freetype"]);
                 if features.gl {
                     if features.egl {
