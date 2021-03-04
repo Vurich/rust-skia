@@ -15,16 +15,17 @@ edition = "2018"
 build = "build.rs"
 links = "skia"
 include = [ 
-	"Cargo.toml", 
-	"build.rs", 
-	"build_support.rs", 
-	"build_support/**/*.rs", 
-	"src/**/*.h", 
-	"src/**/*.cpp", 
-	"src/defaults.rs", 
-	"src/icu.rs", 
-	"src/impls.rs",
-	"src/lib.rs" ]
+    "Cargo.toml",
+    "build.rs",
+    "build_support.rs",
+    "build_support/**/*.rs",
+    "src/**/*.h",
+    "src/**/*.cpp",
+    "src/defaults.rs",
+    "src/icu.rs",
+    "src/impls.rs",
+    "src/lib.rs"
+]
 
 [lib]
 doctest = false
@@ -72,6 +73,8 @@ tar = "0.4.26"
 # multiple of them. clang-sys version 1.0.2 changed the resolvement order.
 # https://github.com/KyleMayes/clang-sys/pull/118
 clang-sys = "=1.0.1"
+
+which = "4.0"
 
 # for reading .cargo.vcs_info.json to get the repository sha1 that is used to download
 # the matching prebuilt binaries.

@@ -30,11 +30,35 @@ mod feature_id {
     pub const WEBPD: &str = "webpd";
 }
 
+fn get_cc() -> (String, String) {
+    let target = cargo::env_var("TARGET").unwrap();
+
+    let target_env_name = target.replace('-', "_");
+    let cc_name = format!("CC_{}", target_env_name);
+    let cxx_name = format!("CXX_{}", target_env_name);
+
+    let target_env_name = target.replace('-', "_").to_ascii_uppercase();
+    let cc_name_upper = format!("CC_{}", target_env_name);
+    let cxx_name_upper = format!("CXX_{}", target_env_name);
+
+    let cc = cargo::env_var(&cc_name)
+        .or(cargo::env_var(&cc_name_upper))
+        .or(cargo::env_var("CC"))
+        .unwrap_or_else(|| "cc".into());
+    let cxx = cargo::env_var(&cxx_name)
+        .or(cargo::env_var(&cxx_name_upper))
+        .or(cargo::env_var("CXX"))
+        .unwrap_or_else(|| "c++".into());
+
+    (cc, cxx)
+}
+
 /// The defaults for the Skia build configuration.
 impl Default for BuildConfiguration {
     fn default() -> Self {
         let skia_debug = matches!(cargo::env_var("SKIA_DEBUG"), Some(v) if v != "0");
 
+        let (cc, cxx) = get_cc();
         BuildConfiguration {
             on_windows: cargo::host().is_windows(),
             skia_debug,
@@ -58,8 +82,8 @@ impl Default for BuildConfiguration {
                 particles: false,
             },
             definitions: Vec::new(),
-            cc: cargo::env_var("CC").unwrap_or_else(|| "clang".to_string()),
-            cxx: cargo::env_var("CXX").unwrap_or_else(|| "clang++".to_string()),
+            cc,
+            cxx,
         }
     }
 }
@@ -193,6 +217,28 @@ pub struct FinalBuildConfiguration {
     pub binding_sources: Vec<PathBuf>,
 }
 
+fn strip_whitespace(s: &str) -> &str {
+    let first_nonwhitespace = s.find(|c: char| !c.is_whitespace()).unwrap();
+    let s = &s[first_nonwhitespace..];
+    let first_whitespace = s.find(|c: char| c.is_whitespace()).unwrap_or(s.len());
+
+    &s[..first_whitespace]
+}
+
+// Horribly janky, but there's no truly good way to do this to my knowledge.
+fn is_clang(command: &str) -> bool {
+    if command.contains("clang") {
+        true
+    } else if let Ok(path) = which::which(strip_whitespace(command)) {
+        let path = format!("{}", std::fs::canonicalize(path).unwrap().display());
+
+        path.contains("clang")
+    } else {
+        // Assume GCC by default
+        false
+    }
+}
+
 impl FinalBuildConfiguration {
     pub fn from_build_configuration(
         build: &BuildConfiguration,
@@ -202,8 +248,12 @@ impl FinalBuildConfiguration {
 
         let gn_args = {
             fn quote(s: &str) -> String {
-                format!("\"{}\"", s)
+                format!("\"{}\"", s.replace('"', "\\\""))
             }
+
+            // We don't handle the case where _only_ cc or cxx is clang, because that complicates our
+            // code for the sake of an incredibly unlikely scenario.
+            let is_cc_clang = is_clang(&build.cc) || is_clang(&build.cxx);
 
             let mut args: Vec<(&str, String)> = vec![
                 ("is_official_build", yes_if(!build.skia_debug)),
@@ -217,15 +267,14 @@ impl FinalBuildConfiguration {
                 ("skia_use_gl", yes_if(features.gl)),
                 ("skia_use_egl", yes_if(features.egl)),
                 ("skia_use_x11", yes_if(features.x11)),
-                ("skia_use_system_libjpeg_turbo", no()),
-                ("skia_use_system_libpng", no()),
                 ("skia_use_libwebp_encode", yes_if(features.webp_encode)),
                 ("skia_use_libwebp_decode", yes_if(features.webp_decode)),
-                ("skia_use_system_zlib", no()),
                 ("skia_use_xps", no()),
                 ("skia_use_expat", yes()),
-                ("skia_use_system_expat", no()),
                 ("skia_use_dng_sdk", yes_if(features.dng)),
+                ("skia_use_system_expat", no()),
+                ("skia_use_system_libpng", no()),
+                ("skia_use_system_zlib", no()),
                 ("cc", quote(&build.cc)),
                 ("cxx", quote(&build.cxx)),
             ];
@@ -277,21 +326,23 @@ impl FinalBuildConfiguration {
             // target specific gn args.
             let target = cargo::target();
             let target_str: &str = &format!("--target={}", target.to_string());
-            let sysroot_arg;
             let opt_level_arg;
-            let mut cflags: Vec<&str> = vec![&target_str];
-            let asmflags: Vec<&str> = vec![&target_str];
 
-            if let Some(sysroot) = cargo::env_var("SDKROOT") {
-                sysroot_arg = format!("--sysroot={}", sysroot);
-                cflags.push(&sysroot_arg);
+            let flags = if is_cc_clang {
+                vec![target_str]
+            } else {
+                vec![]
+            };
+
+            let mut cflags: Vec<&str> = flags.clone();
+            let asmflags: Vec<&str> = flags;
+
+            if !features.x11 {
+                cflags.push("-DEGL_NO_X11");
+                cflags.push("-DEGL_API_FB");
             }
 
             if let Some(opt_level) = &build.opt_level {
-                if opt_level.parse::<usize>() != Ok(0) {
-                    cflags.push("-flto=thin");
-                }
-
                 opt_level_arg = format!("-O{}", opt_level);
                 cflags.push(&opt_level_arg);
             }
@@ -588,11 +639,23 @@ impl BinariesConfiguration {
 }
 
 /// The full build of Skia, skia-bindings, and the generation of bindings.rs.
-pub fn build(build: &FinalBuildConfiguration, config: &BinariesConfiguration) {
+pub fn build(
+    build: &FinalBuildConfiguration,
+    config: &BinariesConfiguration,
+    ninja_command: Option<&Path>,
+    gn_command: Option<&Path>,
+) {
     let python2 = &prerequisites::locate_python2_cmd();
     println!("Python 2 found: {:?}", python2);
-    let ninja = fetch_dependencies(&python2);
-    configure_skia(build, config, &python2, None);
+    let ninja_pathbuf;
+    let ninja = match ninja_command {
+        Some(cmd) => cmd,
+        None => {
+            ninja_pathbuf = fetch_dependencies(&python2);
+            &ninja_pathbuf
+        }
+    };
+    configure_skia(build, config, &python2, gn_command);
     build_skia(build, config, &ninja);
 }
 
@@ -675,7 +738,10 @@ pub fn configure_skia(
         .expect("gn error");
 
     if output.status.code() != Some(0) {
-        panic!("{:?}", String::from_utf8(output.stdout).unwrap());
+        panic!(
+            "{:?}",
+            String::from_utf8(output.stdout).unwrap() + &String::from_utf8(output.stderr).unwrap()
+        );
     }
 }
 
@@ -848,31 +914,18 @@ fn generate_bindings(build: &FinalBuildConfiguration, output_directory: &Path) {
     cc_build.target(target_str);
 
     let sdk;
-    let sysroot = cargo::env_var("SDKROOT");
-    let mut sysroot: Option<&str> = sysroot.as_ref().map(AsRef::as_ref);
-    let mut sysroot_flag = "--sysroot=";
 
     match target.as_strs() {
         (_, "apple", "darwin", _) => {
-            // macOS uses `-isysroot/path/to/sysroot`, but this doesn't appear
-            // to work for other targets. `--sysroot=` works for all targets,
-            // to my knowledge, but doesn't seem to be idiomatic for macOS
-            // compilation. To capture this, we allow manually setting sysroot
-            // on any platform, but we use `-isysroot` for OSX builds and `--sysroot`
-            // elsewhere. If you don't manually set the sysroot, we can automatically
-            // detect it, but this is only possible for macOS.
-            sysroot_flag = "-isysroot";
-
-            if sysroot.is_none() {
-                if let Some(macos_sdk) = xcode::get_sdk_path("macosx") {
-                    sdk = macos_sdk;
-                    sysroot = Some(
-                        sdk.to_str()
-                            .expect("macOS SDK path could not be converted to string"),
-                    );
-                } else {
-                    cargo::warning("failed to get macosx SDK path")
-                }
+            if let Some(macos_sdk) = xcode::get_sdk_path("macosx") {
+                sdk = macos_sdk;
+                builder = builder.clang_arg(format!(
+                    "-isystem{}",
+                    sdk.to_str()
+                        .expect("macOS SDK path could not be converted to string")
+                ));
+            } else {
+                cargo::warning("failed to get macosx SDK path")
             }
         }
         (arch, "linux", "android", _) | (arch, "linux", "androideabi", _) => {
@@ -886,10 +939,6 @@ fn generate_bindings(build: &FinalBuildConfiguration, output_directory: &Path) {
             }
         }
         _ => {}
-    }
-
-    if let Some(sysroot) = sysroot {
-        builder = builder.clang_arg(format!("{}{}", sysroot_flag, sysroot));
     }
 
     println!("COMPILING BINDINGS: {:?}", build.binding_sources);

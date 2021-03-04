@@ -34,6 +34,9 @@ fn main() {
     let build_config = skia::BuildConfiguration::default();
     let binaries_config = skia::BinariesConfiguration::from_cargo_env(&build_config);
 
+    let gn_command = which::which("gn").ok();
+    let ninja_command = which::which("ninja").ok();
+
     //
     // offline build?
     //
@@ -48,8 +51,12 @@ fn main() {
         skia::build_offline(
             &final_configuration,
             &binaries_config,
-            env::offline_ninja_command().as_deref(),
-            env::offline_gn_command().as_deref(),
+            env::offline_ninja_command()
+                .as_deref()
+                .or(ninja_command.as_deref()),
+            env::offline_gn_command()
+                .as_deref()
+                .or(gn_command.as_deref()),
         );
     } else {
         //
@@ -61,7 +68,12 @@ fn main() {
             &build_config,
             &std::env::current_dir().unwrap().join("skia"),
         );
-        skia::build(&final_configuration, &binaries_config);
+        skia::build(
+            &final_configuration,
+            &binaries_config,
+            ninja_command.as_deref(),
+            gn_command.as_deref(),
+        );
     };
 
     binaries_config.commit_to_cargo();
