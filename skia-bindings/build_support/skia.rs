@@ -313,7 +313,7 @@ impl FinalBuildConfiguration {
                     ("skia_enable_skparagraph", yes()),
                     // note: currently, tests need to be enabled, because modules/skparagraph
                     // is not included in the default dependency configuration.
-                    // ("paragraph_tests_enabled", no()),
+                    ("paragraph_tests_enabled", no()),
                 ]);
             } else {
                 args.push(("skia_use_icu", no()));
@@ -647,13 +647,11 @@ pub fn build(
 ) {
     let python2 = &prerequisites::locate_python2_cmd();
     println!("Python 2 found: {:?}", python2);
-    let ninja_pathbuf;
+    let ninja_pathbuf = fetch_dependencies(&python2);
+
     let ninja = match ninja_command {
         Some(cmd) => cmd,
-        None => {
-            ninja_pathbuf = fetch_dependencies(&python2);
-            &ninja_pathbuf
-        }
+        None => &ninja_pathbuf,
     };
     configure_skia(build, config, &python2, gn_command);
     build_skia(build, config, &ninja);
