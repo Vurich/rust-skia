@@ -273,7 +273,7 @@ impl FinalBuildConfiguration {
                 ("skia_use_expat", yes()),
                 ("skia_use_dng_sdk", yes_if(features.dng)),
                 ("skia_use_system_expat", no()),
-                ("skia_use_system_libjpeg_turbo", yes_if(features.builtin_libjpeg_turbo)),
+                ("skia_use_system_libjpeg_turbo", yes_if(!features.builtin_libjpeg_turbo)),
                 ("skia_use_system_libpng", no()),
                 ("skia_use_system_zlib", no()),
                 ("cc", quote(&build.cc)),
