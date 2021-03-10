@@ -49,6 +49,7 @@ textlayout = []
 lottie = []
 pdf = []
 webp = ["webp-encode", "webp-decode"]
+builtin_libjpeg_turbo = []
 webp-encode = []
 webp-decode = []
 # deprecated since 0.25.0

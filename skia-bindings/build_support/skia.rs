@@ -77,7 +77,7 @@ impl Default for BuildConfiguration {
                 text_layout: cfg!(feature = "textlayout"),
                 webp_encode: cfg!(feature = "webp-encode"),
                 webp_decode: cfg!(feature = "webp-decode"),
-                animation: false,
+                builtin_libjpeg_turbo: cfg!(feature = "builtin_libjpeg_turbo"),
                 dng: false,
                 particles: false,
             },
@@ -152,8 +152,8 @@ pub struct Features {
     /// Support the decoding of the WEBP image format to bitmap data.
     pub webp_decode: bool,
 
-    /// Build with animation support (yet unsupported, no wrappers).
-    pub animation: bool,
+    /// Build libjpeg from source instead of linking to system library.
+    pub builtin_libjpeg_turbo: bool,
 
     /// Support DNG file format (currently unsupported because of build errors).
     pub dng: bool,
@@ -273,6 +273,7 @@ impl FinalBuildConfiguration {
                 ("skia_use_expat", yes()),
                 ("skia_use_dng_sdk", yes_if(features.dng)),
                 ("skia_use_system_expat", no()),
+                ("skia_use_system_libjpeg_turbo", yes_if(features.builtin_libjpeg_turbo)),
                 ("skia_use_system_libpng", no()),
                 ("skia_use_system_zlib", no()),
                 ("cc", quote(&build.cc)),

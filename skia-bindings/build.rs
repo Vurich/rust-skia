@@ -34,7 +34,8 @@ fn main() {
     let build_config = skia::BuildConfiguration::default();
     let binaries_config = skia::BinariesConfiguration::from_cargo_env(&build_config);
 
-    let gn_command = which::which("gn").ok();
+    // Using the system `gn` doesn't work as the latest version of `gn` does not compile the version of Skia we use.
+    let gn_command: Option<std::path::PathBuf> = None;
     let ninja_command = which::which("ninja").ok();
 
     //
