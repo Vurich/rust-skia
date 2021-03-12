@@ -21,7 +21,7 @@ pub enum GradientType {
     Sweep(Point),
 }
 
-#[derive(Clone, PartialEq, Debug)]
+#[derive(Clone, PartialEq)]
 pub struct GradientInfo<'a> {
     pub colors: &'a [Color],
     pub color_offsets: &'a [scalar],

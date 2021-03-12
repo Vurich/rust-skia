@@ -381,9 +381,18 @@ impl FinalBuildConfiguration {
                     args.push(("skia_use_system_freetype2", no()));
                     args.push(("skia_enable_fontmgr_android", yes()));
                 }
-                (arch, _, os, _) => {
+                (arch, "apple", "ios", _) => {
                     args.push(("target_cpu", quote(clang::target_arch(arch))));
-                    args.push(("target_os", quote(os)));
+                    args.push(("target_os", quote("ios")));
+                }
+                (arch, _, os, _) => {
+                    let skia_target_os = match os {
+                        "darwin" => "mac",
+                        "windows" => "win",
+                        _ => os,
+                    };
+                    args.push(("target_os", quote(skia_target_os)));
+                    args.push(("target_cpu", quote(clang::target_arch(arch))));
                 }
             }
 

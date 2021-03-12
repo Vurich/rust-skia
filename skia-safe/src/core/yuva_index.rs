@@ -10,7 +10,7 @@ pub fn test_yuva_index_naming() {
 }
 
 #[repr(C)]
-#[derive(Copy, Clone, PartialEq, Eq, Debug)]
+#[derive(Copy, Clone, PartialEq, Eq)]
 pub struct YUVAIndex {
     pub(crate) index: i32,
     pub(crate) channel: ColorChannel,

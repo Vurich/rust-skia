@@ -51,7 +51,7 @@ fn test_attribute_usage_naming() {
 }
 
 #[repr(C)]
-#[derive(Copy, Clone, Eq, Debug)]
+#[derive(Copy, Clone, Eq)]
 pub struct Attribute<'a> {
     pub ty: AttributeType,
     pub usage: AttributeUsage,

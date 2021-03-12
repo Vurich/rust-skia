@@ -1069,7 +1069,6 @@ pub mod lattice {
     use skia_bindings::SkCanvas_Lattice;
     use std::marker::PhantomData;
 
-    #[derive(Debug)]
     pub struct Lattice<'a> {
         pub x_divs: &'a [i32],
         pub y_divs: &'a [i32],

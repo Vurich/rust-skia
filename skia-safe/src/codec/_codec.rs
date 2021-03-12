@@ -31,7 +31,7 @@ fn test_zero_initialized_naming() {
     let _ = ZeroInitialized::Yes;
 }
 
-#[derive(Clone, PartialEq, Eq, Debug)]
+#[derive(Clone, PartialEq, Eq)]
 pub struct Options {
     pub zero_initialized: ZeroInitialized,
     pub subset: IRect,

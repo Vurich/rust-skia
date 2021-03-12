@@ -130,7 +130,7 @@ impl DynamicMemoryWStream {
     }
 }
 
-#[derive(Debug)]
+//#[derive(Debug)]
 pub struct RustStream<'a> {
     inner: Handle<sb::RustStream>,
     _phantom: PhantomData<&'a mut ()>,

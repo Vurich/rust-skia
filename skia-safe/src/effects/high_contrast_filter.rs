@@ -11,7 +11,7 @@ pub mod config {
     }
 }
 
-#[derive(Clone, PartialEq, Debug)]
+#[derive(Clone, PartialEq)]
 pub struct HighContrastConfig {
     pub grayscale: bool,
     pub invert_style: InvertStyle,

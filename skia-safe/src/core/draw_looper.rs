@@ -24,7 +24,7 @@ impl NativeFlattenable for SkDrawLooper {
     }
 }
 
-#[derive(Clone, PartialEq, Default, Debug)]
+#[derive(Clone, PartialEq, Default)]
 #[repr(C)]
 pub struct BlurShadowRec {
     pub sigma: scalar,

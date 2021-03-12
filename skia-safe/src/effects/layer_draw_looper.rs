@@ -27,7 +27,7 @@ impl From<Bits> for BitFlags {
     }
 }
 
-#[derive(Clone, PartialEq, Debug)]
+#[derive(Clone, PartialEq)]
 pub struct LayerInfo {
     pub paint_bits: BitFlags,
     pub color_mode: BlendMode,

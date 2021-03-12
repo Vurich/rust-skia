@@ -4,8 +4,9 @@
 #![allow(clippy::unknown_clippy_lints)]
 #![allow(clippy::unusual_byte_groupings)]
 use skia_safe::{
-    gradient_shader, Color, Matrix, Paint, PaintJoin, PaintStyle, Path, Point, TileMode,
+    Color, Matrix, Paint, PaintJoin, PaintStyle, Path, Point, TileMode,
 };
+use skia_safe::effects::gradient_shader;
 use std::cmp::min;
 
 const PI: f32 = std::f32::consts::PI;
