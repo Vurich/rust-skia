@@ -2,6 +2,7 @@ use crate::prelude::*;
 use crate::{scalar, BlurStyle, Color, NativeFlattenable, Paint, Rect, Vector};
 use skia_bindings as sb;
 use skia_bindings::{SkDrawLooper, SkDrawLooper_BlurShadowRec, SkFlattenable, SkRefCntBase};
+use debug_stub_derive::DebugStub;
 
 #[deprecated(since = "0.33.0", note = "No longer supported.")]
 pub type DrawLooper = RCHandle<SkDrawLooper>;
@@ -24,7 +25,7 @@ impl NativeFlattenable for SkDrawLooper {
     }
 }
 
-#[derive(Clone, PartialEq, Default, Debug)]
+#[derive(Clone, PartialEq, Default, DebugStub)]
 #[repr(C)]
 pub struct BlurShadowRec {
     pub sigma: scalar,

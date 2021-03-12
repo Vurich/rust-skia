@@ -1,5 +1,6 @@
 use crate::prelude::*;
 use crate::{Data, EncodedImageFormat, EncodedOrigin, IRect, ISize, ImageInfo, Pixmap};
+use debug_stub_derive::DebugStub;
 use ffi::CStr;
 use skia_bindings as sb;
 use skia_bindings::{SkCodec, SkCodec_Options, SkRefCntBase};
@@ -31,7 +32,7 @@ fn test_zero_initialized_naming() {
     let _ = ZeroInitialized::Yes;
 }
 
-#[derive(Clone, PartialEq, Eq, Debug)]
+#[derive(Clone, PartialEq, Eq, DebugStub)]
 pub struct Options {
     pub zero_initialized: ZeroInitialized,
     pub subset: IRect,

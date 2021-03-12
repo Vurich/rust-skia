@@ -381,6 +381,14 @@ impl FinalBuildConfiguration {
                     args.push(("skia_use_system_freetype2", no()));
                     args.push(("skia_enable_fontmgr_android", yes()));
                 }
+                (arch, _, "darwin", _) => {
+                    args.push(("target_cpu", quote(clang::target_arch(arch))));
+                    args.push(("target_os", quote("mac")));
+                }
+                (arch, _, "windows", _) => {
+                    args.push(("target_cpu", quote(clang::target_arch(arch))));
+                    args.push(("target_os", quote("win")));
+                }
                 (arch, _, os, _) => {
                     args.push(("target_cpu", quote(clang::target_arch(arch))));
                     args.push(("target_os", quote(os)));
@@ -826,7 +834,7 @@ fn generate_bindings(build: &FinalBuildConfiguration, output_directory: &Path) {
     // on macOS some arrays that are used in opaque types get too large to support Debug.
     // (for example High Sierra: [u16; 105])
     // TODO: may reenable when const generics land in stable.
-    let builder = if cfg!(target_os = "macos") {
+    let builder = if cfg!(target_os = "darwin") {
         builder.derive_debug(false)
     } else {
         builder

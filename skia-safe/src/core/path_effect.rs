@@ -181,7 +181,18 @@ impl PathEffect {
                 let mut v: Vec<scalar> = vec![0.0; dash_info.fCount.try_into().unwrap()];
                 dash_info.fIntervals = v.as_mut_ptr();
                 unsafe {
-                    assert_eq!(dash_type, self.native().asADash(&mut dash_info));
+                    #[derive(PartialEq, Eq, debug_stub_derive::DebugStub)]
+                    #[allow(non_camel_case_types)]
+                    struct SkPathEffect_DashTypeDebug {
+                        inner: SkPathEffect_DashType,
+                    };
+
+                    debug_assert_eq!(
+                        SkPathEffect_DashTypeDebug { inner: dash_type },
+                        SkPathEffect_DashTypeDebug {
+                            inner: self.native().asADash(&mut dash_info)
+                        }
+                    );
                 }
                 Some(DashInfo {
                     intervals: v,
