@@ -687,7 +687,7 @@ pub fn build_offline(
 
 /// Prepares the build and returns the ninja command to use for building Skia.
 pub fn fetch_dependencies(python2: &Path) -> PathBuf {
-    prerequisites::resolve_dependencies();
+    // prerequisites::resolve_dependencies();
 
     // call Skia's git-sync-deps
 
@@ -1349,7 +1349,6 @@ pub(crate) mod rewrite {
 
 mod prerequisites {
     use crate::build_support::{cargo, utils};
-    use flate2::read::GzDecoder;
     use std::ffi::OsStr;
     use std::fs;
     use std::io::Cursor;
@@ -1415,59 +1414,7 @@ mod prerequisites {
     ///
     /// The hashes are taken from the Cargo.toml section [package.metadata].
     fn download_dependencies() {
-        let metadata = cargo::get_metadata();
-
-        for dep in dependencies() {
-            let repo_url = dep.url;
-            let repo_name = dep.repo;
-
-            let dir = PathBuf::from(repo_name);
-
-            // directory exists => assume that the download of the archive was successful.
-            if dir.exists() {
-                continue;
-            }
-
-            // hash available?
-            let (_, short_hash) = metadata
-                .iter()
-                .find(|(n, _)| n == repo_name)
-                .expect("metadata entry not found");
-
-            // remove unpacking directory, github will format it to repo_name-hash
-            let unpack_dir = &PathBuf::from(format!("{}-{}", repo_name, short_hash));
-            if unpack_dir.is_dir() {
-                fs::remove_dir_all(unpack_dir).unwrap();
-            }
-
-            // download
-            let archive_url = &format!("{}/{}", repo_url, short_hash);
-            println!("DOWNLOADING: {}", archive_url);
-            let archive = utils::download(archive_url)
-                .unwrap_or_else(|err| panic!("Failed to download {} ({})", archive_url, err));
-
-            // unpack
-            {
-                let tar = GzDecoder::new(Cursor::new(archive));
-                let mut archive = tar::Archive::new(tar);
-                let dir = std::env::current_dir().unwrap();
-                for entry in archive.entries().expect("failed to iterate over archive") {
-                    let mut entry = entry.unwrap();
-                    let path = entry.path().unwrap();
-                    let mut components = path.components();
-                    let root = components.next().unwrap();
-                    // skip pax headers.
-                    if root.as_os_str() == unpack_dir.as_os_str()
-                        && (dep.path_filter)(components.as_path())
-                    {
-                        entry.unpack_in(&dir).unwrap();
-                    }
-                }
-            }
-
-            // move unpack directory to the target repository directory
-            fs::rename(unpack_dir, repo_name).expect("failed to move directory");
-        }
+        unimplemented!()
     }
 
     // Specifies where to download Skia and Depot Tools archives from.
