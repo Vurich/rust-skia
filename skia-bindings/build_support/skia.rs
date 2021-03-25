@@ -390,9 +390,9 @@ impl FinalBuildConfiguration {
             let opt_level_arg;
 
             let flags = if is_cc_clang {
-                vec![target_str, "-U_FORTIFY_SOURCE"]
+                vec![target_str]
             } else {
-                vec!["-U_FORTIFY_SOURCE"]
+                vec![]
             };
 
             let mut cflags: Vec<&str> = flags
@@ -840,8 +840,12 @@ pub fn build_skia(
     config: &BinariesConfiguration,
     ninja_command: &Path,
 ) {
+    // Hack to ensure target-specific `CPP` is propagated correctly, see comment in `configure_skia`.
+    let cpp = &build.build_configuration.cpp;
     let ninja_status = Command::new(ninja_command)
         .args(&["-C", config.output_directory.to_str().unwrap()])
+        .env("CPP", &cpp.compiler)
+        .env("CPPFLAGS", cpp.flags.join(" "))
         .stdout(Stdio::inherit())
         .stderr(Stdio::inherit())
         .status();
