@@ -45,7 +45,7 @@ fn main() {
         println!("STARTING OFFLINE BUILD");
 
         let final_configuration = skia::FinalBuildConfiguration::from_build_configuration(
-            &build_config,
+            build_config,
             &offline_source_dir,
         );
 
@@ -66,7 +66,7 @@ fn main() {
 
         println!("STARTING A FULL BUILD");
         let final_configuration = skia::FinalBuildConfiguration::from_build_configuration(
-            &build_config,
+            build_config,
             &std::env::current_dir().unwrap().join("skia"),
         );
         skia::build(

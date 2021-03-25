@@ -30,27 +30,78 @@ mod feature_id {
     pub const WEBPD: &str = "webpd";
 }
 
-fn get_cc() -> (String, String) {
+#[derive(Clone, PartialEq, Eq, Hash, Debug)]
+struct Cc {
+    compiler: String,
+    flags: Vec<String>,
+}
+
+impl Cc {
+    fn new(compiler: String, flags: Vec<String>) -> Self {
+        let mut split = compiler.split_ascii_whitespace();
+        let compiler = split.next().unwrap_or_default().to_string();
+        Self {
+            compiler,
+            flags: split.map(str::to_string).chain(flags.into_iter()).collect(),
+        }
+    }
+}
+
+fn get_cc() -> (Cc, Cc, Cc) {
     let target = cargo::env_var("TARGET").unwrap();
 
+    fn get_cc_by_name(cc_name: &str, cflags_name: &str) -> Option<Cc> {
+        cargo::env_var(&cc_name).map(|compiler| {
+            Cc::new(
+                compiler,
+                cargo::env_var(&cflags_name)
+                    .map(|cflags| {
+                        cflags
+                            .split_ascii_whitespace()
+                            .map(str::to_string)
+                            .collect()
+                    })
+                    .unwrap_or_default(),
+            )
+        })
+    }
+
+    fn get_cc_by_name_with_suffixes(name: &str, flags_name: &str, suffixes: &[&str]) -> Option<Cc> {
+        if let Some(cc) = get_cc_by_name(name, flags_name) {
+            return Some(cc);
+        }
+
+        for suffix in suffixes {
+            let cc_name = format!("{}_{}", name, suffix);
+            let cflags_name = format!("{}_{}", flags_name, suffix);
+
+            if let Some(cc) = get_cc_by_name(&cc_name, &cflags_name) {
+                return Some(cc);
+            }
+        }
+
+        None
+    }
+
     let target_env_name = target.replace('-', "_");
-    let cc_name = format!("CC_{}", target_env_name);
-    let cxx_name = format!("CXX_{}", target_env_name);
+    let target_env_name_upper = target.replace('-', "_").to_ascii_uppercase();
 
-    let target_env_name = target.replace('-', "_").to_ascii_uppercase();
-    let cc_name_upper = format!("CC_{}", target_env_name);
-    let cxx_name_upper = format!("CXX_{}", target_env_name);
-
-    let cc = cargo::env_var(&cc_name)
-        .or(cargo::env_var(&cc_name_upper))
-        .or(cargo::env_var("CC"))
-        .unwrap_or_else(|| "cc".into());
-    let cxx = cargo::env_var(&cxx_name)
-        .or(cargo::env_var(&cxx_name_upper))
-        .or(cargo::env_var("CXX"))
-        .unwrap_or_else(|| "c++".into());
-
-    (cc, cxx)
+    (
+        get_cc_by_name_with_suffixes("CC", "CFLAGS", &[&target_env_name, &target_env_name_upper])
+            .unwrap_or_else(|| Cc::new("cc".into(), vec![])),
+        get_cc_by_name_with_suffixes(
+            "CXX",
+            "CXXFLAGS",
+            &[&target_env_name, &target_env_name_upper],
+        )
+        .unwrap_or_else(|| Cc::new("c++".into(), vec![])),
+        get_cc_by_name_with_suffixes(
+            "CPP",
+            "CPPFLAGS",
+            &[&target_env_name, &target_env_name_upper],
+        )
+        .unwrap_or_else(|| Cc::new("cpp".into(), vec![])),
+    )
 }
 
 /// The defaults for the Skia build configuration.
@@ -58,7 +109,7 @@ impl Default for BuildConfiguration {
     fn default() -> Self {
         let skia_debug = matches!(cargo::env_var("SKIA_DEBUG"), Some(v) if v != "0");
 
-        let (cc, cxx) = get_cc();
+        let (cc, cxx, cpp) = get_cc();
         BuildConfiguration {
             on_windows: cargo::host().is_windows(),
             skia_debug,
@@ -84,6 +135,7 @@ impl Default for BuildConfiguration {
             definitions: Vec::new(),
             cc,
             cxx,
+            cpp,
         }
     }
 }
@@ -108,10 +160,13 @@ pub struct BuildConfiguration {
     definitions: Definitions,
 
     /// C compiler to use
-    cc: String,
+    cc: Cc,
 
     /// C++ compiler to use
-    cxx: String,
+    cxx: Cc,
+
+    /// C pre-processor to use
+    cpp: Cc,
 }
 
 #[derive(Clone, PartialEq, Eq, Debug)]
@@ -200,6 +255,8 @@ impl Features {
 /// This is the final, low level build configuration.
 #[derive(Clone, PartialEq, Eq, Debug)]
 pub struct FinalBuildConfiguration {
+    pub build_configuration: BuildConfiguration,
+
     /// The Skia source directory.
     pub skia_source_dir: PathBuf,
 
@@ -241,7 +298,7 @@ fn is_clang(command: &str) -> bool {
 
 impl FinalBuildConfiguration {
     pub fn from_build_configuration(
-        build: &BuildConfiguration,
+        build: BuildConfiguration,
         skia_source_dir: &Path,
     ) -> FinalBuildConfiguration {
         let features = &build.features;
@@ -253,7 +310,7 @@ impl FinalBuildConfiguration {
 
             // We don't handle the case where _only_ cc or cxx is clang, because that complicates our
             // code for the sake of an incredibly unlikely scenario.
-            let is_cc_clang = is_clang(&build.cc) || is_clang(&build.cxx);
+            let is_cc_clang = is_clang(&build.cc.compiler) || is_clang(&build.cxx.compiler);
 
             let mut args: Vec<(&str, String)> = vec![
                 ("is_official_build", yes_if(!build.skia_debug)),
@@ -273,11 +330,14 @@ impl FinalBuildConfiguration {
                 ("skia_use_expat", yes()),
                 ("skia_use_dng_sdk", yes_if(features.dng)),
                 ("skia_use_system_expat", no()),
-                ("skia_use_system_libjpeg_turbo", yes_if(!features.builtin_libjpeg_turbo)),
+                (
+                    "skia_use_system_libjpeg_turbo",
+                    yes_if(!features.builtin_libjpeg_turbo),
+                ),
                 ("skia_use_system_libpng", no()),
                 ("skia_use_system_zlib", no()),
-                ("cc", quote(&build.cc)),
-                ("cxx", quote(&build.cxx)),
+                ("cc", quote(&build.cc.compiler)),
+                ("cxx", quote(&build.cxx.compiler)),
             ];
 
             if features.vulkan {
@@ -330,13 +390,21 @@ impl FinalBuildConfiguration {
             let opt_level_arg;
 
             let flags = if is_cc_clang {
-                vec![target_str]
+                vec![target_str, "-U_FORTIFY_SOURCE"]
             } else {
-                vec![]
+                vec!["-U_FORTIFY_SOURCE"]
             };
 
-            let mut cflags: Vec<&str> = flags.clone();
-            let asmflags: Vec<&str> = flags;
+            let mut cflags: Vec<&str> = flags
+                .iter()
+                .copied()
+                .chain(build.cc.flags.iter().map(|s| &**s))
+                .collect();
+            let asmflags: Vec<&str> = flags
+                .iter()
+                .copied()
+                .chain(build.cxx.flags.iter().map(|s| &**s))
+                .collect();
 
             if !features.x11 {
                 cflags.push("-DEGL_NO_X11");
@@ -473,6 +541,7 @@ impl FinalBuildConfiguration {
         }
 
         FinalBuildConfiguration {
+            build_configuration: build,
             skia_source_dir: skia_source_dir.into(),
             gn_args,
             ninja_files,
@@ -730,6 +799,14 @@ pub fn configure_skia(
 
     println!("Skia args: {}", &gn_args);
 
+    // Kinda a hack but there's no way to set the CPP using Skia's normal build process and
+    // if we just make users set `CPP` then for cross-compilation Cargo will use the same
+    // CPP for both crates built as part of the build script (which should be built for
+    // the host) and crates built as part of the application (which should be built for
+    // the target). This allows the user to use `CPP_<TARGET>` to set the CPP for Skia even
+    // though Skia's build process doesn't understand that variable.
+    let cpp = &build.build_configuration.cpp;
+
     let output = Command::new(gn_command)
         .args(&[
             "gen",
@@ -738,6 +815,8 @@ pub fn configure_skia(
             &format!("--args={}", gn_args),
         ])
         .envs(env::vars())
+        .env("CPP", &cpp.compiler)
+        .env("CPPFLAGS", cpp.flags.join(" "))
         .current_dir(&build.skia_source_dir)
         .stdout(Stdio::inherit())
         .stderr(Stdio::inherit())
