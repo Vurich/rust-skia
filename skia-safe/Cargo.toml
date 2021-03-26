@@ -40,8 +40,6 @@ wayland = ["egl", "skia-bindings/wayland"]
 x11 = ["gl", "skia-bindings/x11"]
 # Enable the text layout engine
 textlayout = ["skia-bindings/textlayout"]
-# Build libjpeg_turbo instead of linking to the system one
-builtin_libjpeg_turbo = ["skia-bindings/builtin_libjpeg_turbo"]
 # Support for the WebP image format
 webp = ["webp-encode", "webp-decode"]
 # Allow writing to WebP files
@@ -52,7 +50,7 @@ webp-decode = ["skia-bindings/webp-decode"]
 # By default, the PDF backend is enabled. X11 is enabled here but it does nothing unless `gl`
 # is also enabled. This is to preserve the previous behaviour where `gl` enabled GLX, while
 # also allowing consumers to opt out of linking with libGL (for systems without X11).
-default = ["pdf", "builtin_libjpeg_turbo"]
+default = ["pdf"]
 
 # implied only, do not use
 gpu = []

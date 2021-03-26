@@ -128,7 +128,6 @@ impl Default for BuildConfiguration {
                 text_layout: cfg!(feature = "textlayout"),
                 webp_encode: cfg!(feature = "webp-encode"),
                 webp_decode: cfg!(feature = "webp-decode"),
-                builtin_libjpeg_turbo: cfg!(feature = "builtin_libjpeg_turbo"),
                 dng: false,
                 particles: false,
             },
@@ -206,9 +205,6 @@ pub struct Features {
 
     /// Support the decoding of the WEBP image format to bitmap data.
     pub webp_decode: bool,
-
-    /// Build libjpeg from source instead of linking to system library.
-    pub builtin_libjpeg_turbo: bool,
 
     /// Support DNG file format (currently unsupported because of build errors).
     pub dng: bool,
@@ -308,9 +304,49 @@ impl FinalBuildConfiguration {
                 format!("\"{}\"", s.replace('"', "\\\""))
             }
 
+            const SKIA_SYSTEM_LIBS_NAME: &str = "SKIA_SYSTEM_LIBS";
+
             // We don't handle the case where _only_ cc or cxx is clang, because that complicates our
             // code for the sake of an incredibly unlikely scenario.
             let is_cc_clang = is_clang(&build.cc.compiler) || is_clang(&build.cxx.compiler);
+
+            let mut system_libjpeg_turbo = false;
+            let mut system_libpng = false;
+            let mut system_expat = false;
+            let mut system_zlib = false;
+
+            if let Some(libs) = cargo::env_var(SKIA_SYSTEM_LIBS_NAME) {
+                let mut available_libs = [
+                    ("libjpeg_turbo", &mut system_libjpeg_turbo),
+                    ("libpng", &mut system_libpng),
+                    ("expat", &mut system_expat),
+                    ("zlib", &mut system_zlib),
+                ];
+
+                'check_lib_names: for lib in libs.split_ascii_whitespace() {
+                    if lib.is_empty() {
+                        continue;
+                    }
+
+                    for (name, flag) in &mut available_libs {
+                        if lib == *name {
+                            **flag = true;
+
+                            continue 'check_lib_names;
+                        }
+                    }
+
+                    panic!(
+                        "Unknown lib specified in ${}: {:?}. Available options: {:?}",
+                        SKIA_SYSTEM_LIBS_NAME,
+                        lib,
+                        available_libs
+                            .iter()
+                            .map(|(name, _)| name)
+                            .collect::<Vec<_>>()
+                    );
+                }
+            }
 
             let mut args: Vec<(&str, String)> = vec![
                 ("is_official_build", yes_if(!build.skia_debug)),
@@ -329,13 +365,13 @@ impl FinalBuildConfiguration {
                 ("skia_use_xps", no()),
                 ("skia_use_expat", yes()),
                 ("skia_use_dng_sdk", yes_if(features.dng)),
-                ("skia_use_system_expat", no()),
+                ("skia_use_system_expat", yes_if(system_expat)),
                 (
                     "skia_use_system_libjpeg_turbo",
-                    yes_if(!features.builtin_libjpeg_turbo),
+                    yes_if(system_libjpeg_turbo),
                 ),
-                ("skia_use_system_libpng", no()),
-                ("skia_use_system_zlib", no()),
+                ("skia_use_system_libpng", yes_if(system_libpng)),
+                ("skia_use_system_zlib", yes_if(system_zlib)),
                 ("cc", quote(&build.cc.compiler)),
                 ("cxx", quote(&build.cxx.compiler)),
             ];
