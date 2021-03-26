@@ -52,7 +52,7 @@ webp-decode = ["skia-bindings/webp-decode"]
 # By default, the PDF backend is enabled. X11 is enabled here but it does nothing unless `gl`
 # is also enabled. This is to preserve the previous behaviour where `gl` enabled GLX, while
 # also allowing consumers to opt out of linking with libGL (for systems without X11).
-default = ["x11", "pdf", "builtin_libjpeg_turbo"]
+default = ["pdf", "builtin_libjpeg_turbo"]
 
 # implied only, do not use
 gpu = []
