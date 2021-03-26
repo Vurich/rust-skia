@@ -107,9 +107,50 @@ fn get_cc() -> (Cc, Cc, Cc) {
 /// The defaults for the Skia build configuration.
 impl Default for BuildConfiguration {
     fn default() -> Self {
+        const SKIA_SYSTEM_LIBS_NAME: &str = "SKIA_SYSTEM_LIBS";
+
         let skia_debug = matches!(cargo::env_var("SKIA_DEBUG"), Some(v) if v != "0");
 
         let (cc, cxx, cpp) = get_cc();
+
+        let mut system_libjpeg_turbo = false;
+        let mut system_libpng = false;
+        let mut system_expat = false;
+        let mut system_zlib = false;
+
+        if let Some(libs) = cargo::env_var(SKIA_SYSTEM_LIBS_NAME) {
+            let mut available_libs = [
+                ("libjpeg_turbo", &mut system_libjpeg_turbo),
+                ("libpng", &mut system_libpng),
+                ("expat", &mut system_expat),
+                ("zlib", &mut system_zlib),
+            ];
+
+            'check_lib_names: for lib in libs.split_ascii_whitespace() {
+                if lib.is_empty() {
+                    continue;
+                }
+
+                for (name, flag) in &mut available_libs {
+                    if lib == *name {
+                        **flag = true;
+
+                        continue 'check_lib_names;
+                    }
+                }
+
+                panic!(
+                    "Unknown lib specified in ${}: {:?}. Available options: {:?}",
+                    SKIA_SYSTEM_LIBS_NAME,
+                    lib,
+                    available_libs
+                        .iter()
+                        .map(|(name, _)| name)
+                        .collect::<Vec<_>>()
+                );
+            }
+        }
+
         BuildConfiguration {
             on_windows: cargo::host().is_windows(),
             skia_debug,
@@ -135,7 +176,35 @@ impl Default for BuildConfiguration {
             cc,
             cxx,
             cpp,
+            system_libs: SystemLibs {
+                libjpeg_turbo: system_libjpeg_turbo,
+                libpng: system_libpng,
+                expat: system_expat,
+                zlib: system_zlib,
+            },
         }
+    }
+}
+
+#[derive(Clone, PartialEq, Eq, Debug)]
+pub struct SystemLibs {
+    libjpeg_turbo: bool,
+    libpng: bool,
+    expat: bool,
+    zlib: bool,
+}
+
+impl SystemLibs {
+    fn link_libraries(&self) -> impl Iterator<Item = &str> {
+        // TODO: Doesn't need to allocate, not a big deal in a build script though
+        vec![
+            Some("turbojpeg").filter(|_| self.libjpeg_turbo),
+            Some("png").filter(|_| self.libpng),
+            Some("expat").filter(|_| self.expat),
+            Some("z").filter(|_| self.zlib),
+        ]
+        .into_iter()
+        .flatten()
     }
 }
 
@@ -166,6 +235,10 @@ pub struct BuildConfiguration {
 
     /// C pre-processor to use
     cpp: Cc,
+
+    /// Whether the libraries in question should be linked to from the target system,
+    /// as opposed to being built into the Skia binary.
+    system_libs: SystemLibs,
 }
 
 #[derive(Clone, PartialEq, Eq, Debug)]
@@ -304,49 +377,9 @@ impl FinalBuildConfiguration {
                 format!("\"{}\"", s.replace('"', "\\\""))
             }
 
-            const SKIA_SYSTEM_LIBS_NAME: &str = "SKIA_SYSTEM_LIBS";
-
             // We don't handle the case where _only_ cc or cxx is clang, because that complicates our
             // code for the sake of an incredibly unlikely scenario.
             let is_cc_clang = is_clang(&build.cc.compiler) || is_clang(&build.cxx.compiler);
-
-            let mut system_libjpeg_turbo = false;
-            let mut system_libpng = false;
-            let mut system_expat = false;
-            let mut system_zlib = false;
-
-            if let Some(libs) = cargo::env_var(SKIA_SYSTEM_LIBS_NAME) {
-                let mut available_libs = [
-                    ("libjpeg_turbo", &mut system_libjpeg_turbo),
-                    ("libpng", &mut system_libpng),
-                    ("expat", &mut system_expat),
-                    ("zlib", &mut system_zlib),
-                ];
-
-                'check_lib_names: for lib in libs.split_ascii_whitespace() {
-                    if lib.is_empty() {
-                        continue;
-                    }
-
-                    for (name, flag) in &mut available_libs {
-                        if lib == *name {
-                            **flag = true;
-
-                            continue 'check_lib_names;
-                        }
-                    }
-
-                    panic!(
-                        "Unknown lib specified in ${}: {:?}. Available options: {:?}",
-                        SKIA_SYSTEM_LIBS_NAME,
-                        lib,
-                        available_libs
-                            .iter()
-                            .map(|(name, _)| name)
-                            .collect::<Vec<_>>()
-                    );
-                }
-            }
 
             let mut args: Vec<(&str, String)> = vec![
                 ("is_official_build", yes_if(!build.skia_debug)),
@@ -365,13 +398,13 @@ impl FinalBuildConfiguration {
                 ("skia_use_xps", no()),
                 ("skia_use_expat", yes()),
                 ("skia_use_dng_sdk", yes_if(features.dng)),
-                ("skia_use_system_expat", yes_if(system_expat)),
+                ("skia_use_system_expat", yes_if(build.system_libs.expat)),
                 (
                     "skia_use_system_libjpeg_turbo",
-                    yes_if(system_libjpeg_turbo),
+                    yes_if(build.system_libs.libjpeg_turbo),
                 ),
-                ("skia_use_system_libpng", yes_if(system_libpng)),
-                ("skia_use_system_zlib", yes_if(system_zlib)),
+                ("skia_use_system_libpng", yes_if(build.system_libs.libpng)),
+                ("skia_use_system_zlib", yes_if(build.system_libs.zlib)),
                 ("cc", quote(&build.cc.compiler)),
                 ("cxx", quote(&build.cxx.compiler)),
             ];
@@ -701,6 +734,8 @@ impl BinariesConfiguration {
             }
             _ => panic!("unsupported target: {:?}", cargo::target()),
         };
+
+        link_libraries.extend(build.system_libs.link_libraries());
 
         let output_directory = cargo::output_directory()
             .join(SKIA_OUTPUT_DIR)
