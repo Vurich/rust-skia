@@ -50,34 +50,29 @@ impl Cc {
 fn get_cc() -> (Cc, Cc, Cc) {
     let target = cargo::env_var("TARGET").unwrap();
 
-    fn get_cc_by_name(cc_name: &str, cflags_name: &str) -> Option<Cc> {
-        cargo::env_var(&cc_name).map(|compiler| {
-            Cc::new(
-                compiler,
+    fn get_cc_by_name_with_suffixes(name: &str, flags_name: &str, suffixes: &[&str]) -> Option<Cc> {
+        let mut flags: Vec<String> = vec![];
+        let mut cc = None;
+
+        for (cc_name, cflags_name) in std::iter::once((name.to_string(), flags_name.to_string()))
+            .chain(suffixes.iter().map(|suffix| {
+                (
+                    format!("{}_{}", name, suffix),
+                    format!("{}_{}", flags_name, suffix),
+                )
+            }))
+        {
+            cc = cc.or_else(|| cargo::env_var(&cc_name));
+            flags.extend(
                 cargo::env_var(&cflags_name)
                     .map(|cflags| {
                         cflags
                             .split_ascii_whitespace()
                             .map(str::to_string)
-                            .collect()
+                            .collect::<Vec<_>>()
                     })
                     .unwrap_or_default(),
-            )
-        })
-    }
-
-    fn get_cc_by_name_with_suffixes(name: &str, flags_name: &str, suffixes: &[&str]) -> Option<Cc> {
-        if let Some(cc) = get_cc_by_name(name, flags_name) {
-            return Some(cc);
-        }
-
-        for suffix in suffixes {
-            let cc_name = format!("{}_{}", name, suffix);
-            let cflags_name = format!("{}_{}", flags_name, suffix);
-
-            if let Some(cc) = get_cc_by_name(&cc_name, &cflags_name) {
-                return Some(cc);
-            }
+            );
         }
 
         None
