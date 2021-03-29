@@ -75,13 +75,13 @@ fn get_cc() -> (Cc, Cc, Cc) {
             );
         }
 
-        None
+        cc.map(|compiler| Cc { compiler, flags })
     }
 
     let target_env_name = target.replace('-', "_");
     let target_env_name_upper = target.replace('-', "_").to_ascii_uppercase();
 
-    (
+    dbg!((
         get_cc_by_name_with_suffixes("CC", "CFLAGS", &[&target_env_name, &target_env_name_upper])
             .unwrap_or_else(|| Cc::new("cc".into(), vec![])),
         get_cc_by_name_with_suffixes(
@@ -96,7 +96,7 @@ fn get_cc() -> (Cc, Cc, Cc) {
             &[&target_env_name, &target_env_name_upper],
         )
         .unwrap_or_else(|| Cc::new("cpp".into(), vec![])),
-    )
+    ))
 }
 
 /// The defaults for the Skia build configuration.
