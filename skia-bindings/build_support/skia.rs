@@ -193,7 +193,7 @@ impl SystemLibs {
     fn link_libraries(&self) -> impl Iterator<Item = &str> {
         // TODO: Doesn't need to allocate, not a big deal in a build script though
         vec![
-            Some("turbojpeg").filter(|_| self.libjpeg_turbo),
+            Some("jpeg").filter(|_| self.libjpeg_turbo),
             Some("png").filter(|_| self.libpng),
             Some("expat").filter(|_| self.expat),
             Some("z").filter(|_| self.zlib),
