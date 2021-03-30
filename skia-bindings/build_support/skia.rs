@@ -108,16 +108,22 @@ impl Default for BuildConfiguration {
 
         let (cc, cxx, cpp) = get_cc();
 
+        let mut system_expat = false;
+        let mut system_harfbuzz = false;
+        let mut system_icu = false;
         let mut system_libjpeg_turbo = false;
         let mut system_libpng = false;
-        let mut system_expat = false;
+        let mut system_libwebp = false;
         let mut system_zlib = false;
 
         if let Some(libs) = cargo::env_var(SKIA_SYSTEM_LIBS_NAME) {
             let mut available_libs = [
+                ("expat", &mut system_expat),
+                ("harfbuzz", &mut system_harfbuzz),
+                ("icu", &mut system_icu),
                 ("libjpeg_turbo", &mut system_libjpeg_turbo),
                 ("libpng", &mut system_libpng),
-                ("expat", &mut system_expat),
+                ("libwebp", &mut system_libwebp),
                 ("zlib", &mut system_zlib),
             ];
 
@@ -172,9 +178,12 @@ impl Default for BuildConfiguration {
             cxx,
             cpp,
             system_libs: SystemLibs {
+                expat: system_expat,
+                harfbuzz: system_harfbuzz,
+                icu: system_icu,
                 libjpeg_turbo: system_libjpeg_turbo,
                 libpng: system_libpng,
-                expat: system_expat,
+                libwebp: system_libpng,
                 zlib: system_zlib,
             },
         }
@@ -183,9 +192,12 @@ impl Default for BuildConfiguration {
 
 #[derive(Clone, PartialEq, Eq, Debug)]
 pub struct SystemLibs {
+    expat: bool,
+    harfbuzz: bool,
+    icu: bool,
     libjpeg_turbo: bool,
     libpng: bool,
-    expat: bool,
+    libwebp: bool,
     zlib: bool,
 }
 
@@ -193,9 +205,12 @@ impl SystemLibs {
     fn link_libraries(&self) -> impl Iterator<Item = &str> {
         // TODO: Doesn't need to allocate, not a big deal in a build script though
         vec![
+            Some("expat").filter(|_| self.expat),
+            Some("harfbuzz").filter(|_| self.harfbuzz),
+            Some("icu").filter(|_| self.icu),
             Some("jpeg").filter(|_| self.libjpeg_turbo),
             Some("png").filter(|_| self.libpng),
-            Some("expat").filter(|_| self.expat),
+            Some("webp").filter(|_| self.libwebp),
             Some("z").filter(|_| self.zlib),
         ]
         .into_iter()
@@ -430,10 +445,13 @@ impl FinalBuildConfiguration {
                 args.extend(vec![
                     ("skia_enable_skshaper", yes()),
                     ("skia_use_icu", yes()),
-                    ("skia_use_system_icu", no()),
+                    ("skia_use_system_icu", yes_if(build.system_libs.icu)),
                     ("skia_use_harfbuzz", yes()),
                     ("skia_pdf_subset_harfbuzz", yes()),
-                    ("skia_use_system_harfbuzz", no()),
+                    (
+                        "skia_use_system_harfbuzz",
+                        yes_if(build.system_libs.harfbuzz),
+                    ),
                     ("skia_use_sfntly", no()),
                     ("skia_enable_skparagraph", yes()),
                     // note: currently, tests need to be enabled, because modules/skparagraph
@@ -445,7 +463,7 @@ impl FinalBuildConfiguration {
             }
 
             if features.webp_encode || features.webp_decode {
-                args.push(("skia_use_system_libwebp", no()))
+                args.push(("skia_use_system_libwebp", yes_if(build.system_libs.libwebp)))
             }
 
             // target specific gn args.
