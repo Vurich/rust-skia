@@ -183,7 +183,7 @@ impl Default for BuildConfiguration {
                 icu: system_icu,
                 libjpeg_turbo: system_libjpeg_turbo,
                 libpng: system_libpng,
-                libwebp: system_libpng,
+                libwebp: system_libwebp,
                 zlib: system_zlib,
             },
         }
