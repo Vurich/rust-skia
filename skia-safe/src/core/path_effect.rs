@@ -185,7 +185,7 @@ impl PathEffect {
                     #[allow(non_camel_case_types)]
                     struct SkPathEffect_DashTypeDebug {
                         inner: SkPathEffect_DashType,
-                    };
+                    }
 
                     debug_assert_eq!(
                         SkPathEffect_DashTypeDebug { inner: dash_type },

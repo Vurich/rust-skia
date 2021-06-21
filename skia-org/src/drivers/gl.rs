@@ -12,7 +12,7 @@ impl DrawingDriver for OpenGL {
 
     fn new() -> Self {
         Self {
-            context: gpu::Context::new_gl(None).unwrap(),
+            context: gpu::Context::new_gl(None, None).unwrap(),
         }
     }
 
@@ -25,7 +25,9 @@ impl DrawingDriver for OpenGL {
     ) {
         let image_info = ImageInfo::new_n32_premul((width * 2, height * 2), None);
         let mut surface = Surface::new_render_target(
-            &mut self.context,
+            // `self.context` is a refcounted pointer, and so cloning here is valid and will still
+            // mutate the internal context correctly.
+            &mut self.context.clone().into(),
             Budgeted::Yes,
             &image_info,
             None,
